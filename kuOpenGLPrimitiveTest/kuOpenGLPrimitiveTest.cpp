@@ -6,6 +6,10 @@
 
 bool		 keyPressArray[1024];
 
+glm::vec3	 cameraPos   = glm::vec3(0.0f, 0.0f, 10.0f);
+glm::vec3	 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3	 cameraUp	 = glm::vec3(0.0f, 1.0f, 0.0f);
+
 GLFWwindow * kuGLInit(const char * title, int xRes, int yRes);
 void		 key_callback(GLFWwindow * window, int key, int scancode, int action, int mode);
 void		 mouse_callback(GLFWwindow * window, double xPos, double yPos);
@@ -20,6 +24,8 @@ void main()
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
 
 		glfwSwapBuffers(window);
 	}
