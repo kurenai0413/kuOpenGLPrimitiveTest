@@ -28,8 +28,8 @@ void main()
 	objectShader.Load("VertexShader.vert", "FragmentShader.frag");
 
 	// Create cylinder top
-	float	  radius = 0.5f;
-	int		  divisionNum	 = 6;
+	float	  radius		 = 0.25f;
+	int		  divisionNum	 = 36;
 	int		  vertexNum		 = /*2 **/ (divisionNum + 1);
 	GLfloat * cylinderVertex = new GLfloat [3 * vertexNum];
 
@@ -44,6 +44,21 @@ void main()
 		cylinderVertex[3 * i + 2] = 0;
 	}
 
+	GLuint cylinderVAO;
+	glGenVertexArrays(1, &cylinderVAO);
+	GLuint cylinderVBO;
+	glGenBuffers(1, &cylinderVBO);
+
+	glBindVertexArray(cylinderVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, cylinderVBO);
+	glBufferData(GL_ARRAY_BUFFER, 3 * vertexNum * sizeof(GLfloat), cylinderVertex, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+	glEnableVertexAttribArray(0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
 	while (!glfwWindowShouldClose(window))
 	{
 		glfwPollEvents();
@@ -51,7 +66,9 @@ void main()
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
+		glBindVertexArray(cylinderVAO);
+		glDrawArrays(GL_TRIANGLE_FAN, 0, vertexNum);
+		glBindVertexArray(0);
 
 		glfwSwapBuffers(window);
 	}
