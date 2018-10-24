@@ -32,6 +32,7 @@ void main()
 	int		  divisionNum	 = 36;
 	int		  vertexNum		 = /*2 **/ (divisionNum + 1);
 	GLfloat * cylinderVertex = new GLfloat [3 * vertexNum];
+	GLfloat * cylinderColor  = new GLfloat [3 * vertexNum];
 
 	for (int i = 0; i < vertexNum; i++)
 	{
@@ -65,7 +66,9 @@ void main()
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+		
+		objectShader.Use();
+		
 		glBindVertexArray(cylinderVAO);
 		glDrawArrays(GL_TRIANGLE_FAN, 0, vertexNum);
 		glBindVertexArray(0);
