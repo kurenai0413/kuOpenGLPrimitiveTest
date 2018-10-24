@@ -113,6 +113,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="kuOpenGLPrimitiveTest.cpp" />
+    <ClCompile Include="kuShaderHandler.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="kuShaderHandler.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="FragmentShader.frag" />
+    <None Include="VertexShader.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

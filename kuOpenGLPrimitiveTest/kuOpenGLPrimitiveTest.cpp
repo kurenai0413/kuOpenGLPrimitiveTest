@@ -4,6 +4,12 @@
 #include <GLFW/glfw3.h>
 #include <GLM/glm.hpp>
 
+#include "kuShaderHandler.h"
+
+#define pi			3.1415926
+#define WND_WIDTH	1024
+#define WND_HEIGHT	768
+
 bool		 keyPressArray[1024];
 
 glm::vec3	 cameraPos   = glm::vec3(0.0f, 0.0f, 10.0f);
@@ -16,7 +22,27 @@ void		 mouse_callback(GLFWwindow * window, double xPos, double yPos);
 
 void main()
 {
-	GLFWwindow * window = kuGLInit("kuOpenGLTest", 1024, 768);
+	GLFWwindow		*	window = kuGLInit("kuOpenGLTest", WND_WIDTH, WND_HEIGHT);
+
+	kuShaderHandler		objectShader;
+	objectShader.Load("VertexShader.vert", "FragmentShader.frag");
+
+	// Create cylinder top
+	float	  radius = 0.5f;
+	int		  divisionNum	 = 6;
+	int		  vertexNum		 = /*2 **/ (divisionNum + 1);
+	GLfloat * cylinderVertex = new GLfloat [3 * vertexNum];
+
+	for (int i = 0; i < vertexNum; i++)
+	{
+		float theta = (float)i * 360.0f / (float)divisionNum;
+		float cosVal = cos(theta * pi / 180);
+		float sinVal = sin(theta * pi / 180);
+
+		cylinderVertex[3 * i]	  = radius * cosVal;
+		cylinderVertex[3 * i + 1] = radius * sinVal;
+		cylinderVertex[3 * i + 2] = 0;
+	}
 
 	while (!glfwWindowShouldClose(window))
 	{
