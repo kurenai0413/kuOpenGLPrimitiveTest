@@ -18,7 +18,7 @@ bool		 keyPressArray[1024];
 GLFWwindow * kuGLInit(const char * title, int xRes, int yRes);
 void		 key_callback(GLFWwindow * window, int key, int scancode, int action, int mode);
 void		 mouse_callback(GLFWwindow * window, double xPos, double yPos);
-void		 createCylinder(std::vector<GLfloat> &cylinderVertices, float radius, int divisionNum, float length);
+void		 createCylinderVertices(std::vector<GLfloat> &cylinderVertices, float radius, int divisionNum, float length);
 
 void main()
 {
@@ -31,7 +31,7 @@ void main()
 
 	int		  divisionNum	 = 36;
 	int		  vertexNum		 = 2 * (divisionNum + 1);
-	createCylinder(cylinderVertices, 0.05f, divisionNum, 1.2f);
+	createCylinderVertices(cylinderVertices, 0.05f, divisionNum, 1.2f);
 
 	GLuint cylinderVAO;
 	glGenVertexArrays(1, &cylinderVAO);
@@ -175,7 +175,11 @@ void mouse_callback(GLFWwindow * window, double xPos, double yPos)
 {
 }
 
-void createCylinder(std::vector<GLfloat> &cylinderVertices, float radius, int divisionNum, float length)
+void createCylinderModel(std::vector<GLfloat>& cylinderVertices, float radius, int divisionNum, float length)
+{
+}
+
+void createCylinderVertices(std::vector<GLfloat> &cylinderVertices, float radius, int divisionNum, float length)
 {
 	if (cylinderVertices.size() != 0)
 		cylinderVertices.clear();
