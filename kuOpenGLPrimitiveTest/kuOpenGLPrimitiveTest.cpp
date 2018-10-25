@@ -3,6 +3,8 @@
 #include <GLEW/glew.h>
 #include <GLFW/glfw3.h>
 #include <GLM/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "kuShaderHandler.h"
 
@@ -11,10 +13,6 @@
 #define WND_HEIGHT	768
 
 bool		 keyPressArray[1024];
-
-glm::vec3	 cameraPos   = glm::vec3(0.0f, 0.0f, 10.0f);
-glm::vec3	 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-glm::vec3	 cameraUp	 = glm::vec3(0.0f, 1.0f, 0.0f);
 
 GLFWwindow * kuGLInit(const char * title, int xRes, int yRes);
 void		 key_callback(GLFWwindow * window, int key, int scancode, int action, int mode);
@@ -28,10 +26,10 @@ void main()
 	kuShaderHandler		objectShader;
 	objectShader.Load("VertexShader.vert", "FragmentShader.frag");
 
-	int		  divisionNum	 = 6;
+	int		  divisionNum	 = 36;
 	int		  vertexNum		 = 2 * (divisionNum + 1);
 	GLfloat * cylinderVertex = new GLfloat[3 * vertexNum];
-	createCylinder(cylinderVertex, 0.25f, divisionNum, 1.0f);
+	createCylinder(cylinderVertex, 0.05f, divisionNum, 1.2f);
 
 	GLuint cylinderVAO;
 	glGenVertexArrays(1, &cylinderVAO);
@@ -48,6 +46,29 @@ void main()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
+	glm::vec3	 cameraPos		 = glm::vec3(1.0f, 1.0f, -1.0f);
+	glm::vec3	 cameraTarget	 = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3	 cameraDirection = glm::normalize(cameraPos - cameraTarget);
+	glm::vec3	 worldUp		 = glm::vec3(0.0f, 1.0f, 0.0f);
+	glm::vec3	 cameraRight	 = glm::normalize(glm::cross(worldUp, cameraDirection));
+	glm::vec3	 cameraUp		 = glm::cross(cameraDirection, cameraRight);
+
+	glm::mat4	 modelMat;
+	glm::mat4	 projectionMat = glm::perspective(glm::radians(45.0f), (float)WND_WIDTH/(float)WND_HEIGHT, 0.1f, 100.0f);
+	glm::mat4	 viewMat	   = glm::lookAt(cameraPos, cameraTarget, cameraUp);
+
+	objectShader.Use();
+
+	GLuint modelMatLoc, viewMatLoc, projectionMatLoc;
+	modelMatLoc = glGetUniformLocation(objectShader.ShaderProgramID, "model");
+	glUniformMatrix4fv(modelMatLoc, 1, GL_FALSE, glm::value_ptr(modelMat));
+
+	viewMatLoc = glGetUniformLocation(objectShader.ShaderProgramID, "view");
+	glUniformMatrix4fv(viewMatLoc, 1, GL_FALSE, glm::value_ptr(viewMat));
+
+	projectionMatLoc = glGetUniformLocation(objectShader.ShaderProgramID, "projection");
+	glUniformMatrix4fv(projectionMatLoc, 1, GL_FALSE, glm::value_ptr(projectionMat));
+
 	while (!glfwWindowShouldClose(window))
 	{
 		glfwPollEvents();
@@ -55,10 +76,11 @@ void main()
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
-		objectShader.Use();
-		
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 		glBindVertexArray(cylinderVAO);
-		glDrawArrays(GL_LINE_STRIP, 0, vertexNum);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, vertexNum);
 		glBindVertexArray(0);
 
 		glfwSwapBuffers(window);
@@ -76,7 +98,7 @@ GLFWwindow * kuGLInit(const char * title, int xRes, int yRes)
 		std::cout << "GLFW initialization failed." << std::endl;
 		return NULL;
 	}
-
+	glfwWindowHint(GLFW_SAMPLES, 4);
 	GLFWwindow * window = glfwCreateWindow(xRes, yRes, title, NULL, NULL);
 	if (!window)
 	{
@@ -107,6 +129,7 @@ GLFWwindow * kuGLInit(const char * title, int xRes, int yRes)
 
 	// Setup OpenGL options (z-buffer)
 	//glEnable(GL_DEPTH_TEST);
+	//glEnable(GL_MULTISAMPLE);
 
 	// get version info
 	const GLubyte* renderer = glGetString(GL_RENDERER);
