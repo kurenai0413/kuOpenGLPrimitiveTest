@@ -37,7 +37,7 @@ void main()
 	std::vector<GLfloat>	cylinderVertices;
 	std::vector<int>		cylinderSideIndices, cylinderTopIndices, cylinderBottomIndices;
 	//createCylinderVertices(cylinderVertices, 0.05f, divisionNum, 1.2f);
-	createCylinderModel(cylinderVertices, cylinderSideIndices, cylinderTopIndices, cylinderBottomIndices, 0.25f, divisionNum, 1.2f);
+	createCylinderModel(cylinderVertices, cylinderSideIndices, cylinderTopIndices, cylinderBottomIndices, 0.15f, divisionNum, 1.2f);
 	
 	std::cout << "cylinderTopIndices.size(): " << cylinderTopIndices.size() << std::endl;
 	std::cout << "cylinderBottomIndices.size(): " << cylinderBottomIndices.size() << std::endl;
@@ -106,7 +106,7 @@ void main()
 
 		glBindVertexArray(cylinderVAO);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cylinderEBO[0]);
-		glDrawElements(GL_LINE_STRIP, vertexNum, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLE_STRIP, vertexNum, GL_UNSIGNED_INT, 0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cylinderEBO[1]);
 		glDrawElements(GL_TRIANGLE_FAN, divisionNum + 2, GL_UNSIGNED_INT, 0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cylinderEBO[2]);
@@ -158,7 +158,10 @@ GLFWwindow * kuGLInit(const char * title, int xRes, int yRes)
 	glViewport(0, 0, xRes, yRes);
 
 	// Setup OpenGL options (z-buffer)
-	//glEnable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_FRONT);
+	//glEnable(GL_CULL_FACE);
 	//glEnable(GL_MULTISAMPLE);
 
 	// get version info
