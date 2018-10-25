@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 
 #include <GLEW/glew.h>
 #include <GLFW/glfw3.h>
@@ -17,7 +18,7 @@ bool		 keyPressArray[1024];
 GLFWwindow * kuGLInit(const char * title, int xRes, int yRes);
 void		 key_callback(GLFWwindow * window, int key, int scancode, int action, int mode);
 void		 mouse_callback(GLFWwindow * window, double xPos, double yPos);
-void		 createCylinder(GLfloat * cylinderVertices, float radius, int divisionNum, float length);
+void		 createCylinder(std::vector<GLfloat> &cylinderVertices, float radius, int divisionNum, float length);
 
 void main()
 {
@@ -26,19 +27,22 @@ void main()
 	kuShaderHandler		objectShader;
 	objectShader.Load("VertexShader.vert", "FragmentShader.frag");
 
+	std::vector<GLfloat>	cylinderVertices;
+
 	int		  divisionNum	 = 36;
 	int		  vertexNum		 = 2 * (divisionNum + 1);
-	GLfloat * cylinderVertex = new GLfloat[3 * vertexNum];
-	createCylinder(cylinderVertex, 0.05f, divisionNum, 1.2f);
+	createCylinder(cylinderVertices, 0.05f, divisionNum, 1.2f);
 
 	GLuint cylinderVAO;
 	glGenVertexArrays(1, &cylinderVAO);
 	GLuint cylinderVBO;
 	glGenBuffers(1, &cylinderVBO);
 
+	std::cout << "Number of vertices: " << cylinderVertices.size() << std::endl;
+
 	glBindVertexArray(cylinderVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, cylinderVBO);
-	glBufferData(GL_ARRAY_BUFFER, 3 * vertexNum * sizeof(GLfloat), cylinderVertex, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, cylinderVertices.size() * sizeof(GLfloat), &cylinderVertices[0], GL_STATIC_DRAW);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 	glEnableVertexAttribArray(0);
@@ -171,27 +175,28 @@ void mouse_callback(GLFWwindow * window, double xPos, double yPos)
 {
 }
 
-void createCylinder(GLfloat * cylinderVertices, float radius, int divisionNum, float length)
+void createCylinder(std::vector<GLfloat> &cylinderVertices, float radius, int divisionNum, float length)
 {
+	if (cylinderVertices.size() != 0)
+		cylinderVertices.clear();
+
 	// Create cylinder top
-	int		  vertexNum     = 2 * (divisionNum + 1);
-	GLfloat * cylinderColor = new GLfloat[3 * vertexNum];
+	int		  vertexNum = 2 * (divisionNum + 1);
 
 	for (int i = 0; i <= divisionNum; i++)
 	{
-		float	theta  = (float)i * 360.0f / (float)divisionNum;
+		float	theta = (float)i * 360.0f / (float)divisionNum;
 		float	cosVal = cos(theta * pi / 180);
 		float	sinVal = sin(theta * pi / 180);
 
-		int		indexTop	= 2 * 3 * i;			// 
-		int		indexBottom = indexTop + 3;			// 
-
-		cylinderVertices[indexTop]		  = radius * cosVal;
-		cylinderVertices[indexTop + 1]	  = -0.5f * length;
-		cylinderVertices[indexTop + 2]	  = radius * sinVal;
-
-		cylinderVertices[indexBottom]	  = radius * cosVal;
-		cylinderVertices[indexBottom + 1] = 0.5f * length;
-		cylinderVertices[indexBottom + 2] = radius * sinVal;
+		// Top
+		cylinderVertices.push_back(radius * cosVal);
+		cylinderVertices.push_back(0.5f * length);
+		cylinderVertices.push_back(radius * sinVal);
+		
+		// Bottom
+		cylinderVertices.push_back(radius * cosVal);
+		cylinderVertices.push_back(-0.5f * length);
+		cylinderVertices.push_back(radius * sinVal);
 	}
 }
