@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <windows.h>
 
 #include <GLEW/glew.h>
 #include <GLFW/glfw3.h>
@@ -18,7 +19,9 @@ bool		 keyPressArray[1024];
 GLFWwindow * kuGLInit(const char * title, int xRes, int yRes);
 void		 key_callback(GLFWwindow * window, int key, int scancode, int action, int mode);
 void		 mouse_callback(GLFWwindow * window, double xPos, double yPos);
-void		 createCylinderVertices(std::vector<GLfloat> &cylinderVertices, float radius, int divisionNum, float length);
+void		 createCylinderModel(std::vector<GLfloat> &cylinderVertices, std::vector<int> &cylinderIndices, float radius, int divisionNum, float length);
+void		 createCylinderVertices(std::vector<GLfloat> &cylinderVertices, float radius, const unsigned int divisionNum, float length);
+void		 createCylinderIndices(std::vector<int> &cylinderIndices, const unsigned int divisionNum);
 
 void main()
 {
@@ -27,18 +30,22 @@ void main()
 	kuShaderHandler		objectShader;
 	objectShader.Load("VertexShader.vert", "FragmentShader.frag");
 
-	std::vector<GLfloat>	cylinderVertices;
-
 	int		  divisionNum	 = 36;
 	int		  vertexNum		 = 2 * (divisionNum + 1);
-	createCylinderVertices(cylinderVertices, 0.05f, divisionNum, 1.2f);
+	std::vector<GLfloat>	cylinderVertices;
+	std::vector<int>		cylinderIndices;
+	//createCylinderVertices(cylinderVertices, 0.05f, divisionNum, 1.2f);
+	createCylinderModel(cylinderVertices, cylinderIndices, 0.25f, divisionNum, 1.2f);
 
-	GLuint cylinderVAO;
+	GLuint cylinderVAO = 0;
 	glGenVertexArrays(1, &cylinderVAO);
-	GLuint cylinderVBO;
+	GLuint cylinderVBO = 0;
 	glGenBuffers(1, &cylinderVBO);
+	GLuint cylinderEBO[3];					// Side, top, bottom
+	glGenBuffers(3, cylinderEBO);
 
 	std::cout << "Number of vertices: " << cylinderVertices.size() << std::endl;
+	std::cout << "Number of indices: " << cylinderIndices.size() << std::endl;
 
 	glBindVertexArray(cylinderVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, cylinderVBO);
@@ -46,6 +53,9 @@ void main()
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 	glEnableVertexAttribArray(0);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cylinderEBO[0]);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, cylinderIndices.size() * sizeof(int), &cylinderIndices[0], GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
@@ -58,8 +68,8 @@ void main()
 	glm::vec3	 cameraUp		 = glm::cross(cameraDirection, cameraRight);
 
 	glm::mat4	 modelMat;
-	glm::mat4	 projectionMat = glm::perspective(glm::radians(45.0f), (float)WND_WIDTH/(float)WND_HEIGHT, 0.1f, 100.0f);
-	glm::mat4	 viewMat	   = glm::lookAt(cameraPos, cameraTarget, cameraUp);
+	glm::mat4	 projectionMat	 = glm::perspective(glm::radians(45.0f), (float)WND_WIDTH/(float)WND_HEIGHT, 0.1f, 100.0f);
+	glm::mat4	 viewMat		 = glm::lookAt(cameraPos, cameraTarget, cameraUp);
 
 	objectShader.Use();
 
@@ -84,7 +94,9 @@ void main()
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		glBindVertexArray(cylinderVAO);
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, vertexNum);
+		//glDrawArrays(GL_TRIANGLE_STRIP, 0, vertexNum);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cylinderEBO[0]);
+		glDrawElements(GL_TRIANGLE_STRIP, vertexNum, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 
 		glfwSwapBuffers(window);
@@ -175,11 +187,13 @@ void mouse_callback(GLFWwindow * window, double xPos, double yPos)
 {
 }
 
-void createCylinderModel(std::vector<GLfloat>& cylinderVertices, float radius, int divisionNum, float length)
+void createCylinderModel(std::vector<GLfloat>& cylinderVertices, std::vector<int>& cylinderIndices, float radius, int divisionNum, float length)
 {
+	createCylinderVertices(cylinderVertices, radius, divisionNum, length);
+	createCylinderIndices(cylinderIndices, divisionNum);
 }
 
-void createCylinderVertices(std::vector<GLfloat> &cylinderVertices, float radius, int divisionNum, float length)
+void createCylinderVertices(std::vector<GLfloat> &cylinderVertices, float radius, const unsigned int divisionNum, float length)
 {
 	if (cylinderVertices.size() != 0)
 		cylinderVertices.clear();
@@ -202,5 +216,14 @@ void createCylinderVertices(std::vector<GLfloat> &cylinderVertices, float radius
 		cylinderVertices.push_back(radius * cosVal);
 		cylinderVertices.push_back(-0.5f * length);
 		cylinderVertices.push_back(radius * sinVal);
+	}
+}
+
+void createCylinderIndices(std::vector<int>& cylinderIndices, const unsigned int divisionNum)
+{
+	int vertexNum = 2 * (divisionNum + 1);
+	for (int i = 0; i < vertexNum; i++)
+	{
+		cylinderIndices.push_back(i);
 	}
 }
