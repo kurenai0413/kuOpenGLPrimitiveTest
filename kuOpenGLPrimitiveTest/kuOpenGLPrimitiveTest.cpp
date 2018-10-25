@@ -19,6 +19,7 @@ glm::vec3	 cameraUp	 = glm::vec3(0.0f, 1.0f, 0.0f);
 GLFWwindow * kuGLInit(const char * title, int xRes, int yRes);
 void		 key_callback(GLFWwindow * window, int key, int scancode, int action, int mode);
 void		 mouse_callback(GLFWwindow * window, double xPos, double yPos);
+void		 createCylinder(GLfloat * cylinderVertices, float radius, int divisionNum, float length);
 
 void main()
 {
@@ -27,23 +28,10 @@ void main()
 	kuShaderHandler		objectShader;
 	objectShader.Load("VertexShader.vert", "FragmentShader.frag");
 
-	// Create cylinder top
-	float	  radius		 = 0.25f;
-	int		  divisionNum	 = 36;
-	int		  vertexNum		 = /*2 **/ (divisionNum + 1);
-	GLfloat * cylinderVertex = new GLfloat [3 * vertexNum];
-	GLfloat * cylinderColor  = new GLfloat [3 * vertexNum];
-
-	for (int i = 0; i < vertexNum; i++)
-	{
-		float theta = (float)i * 360.0f / (float)divisionNum;
-		float cosVal = cos(theta * pi / 180);
-		float sinVal = sin(theta * pi / 180);
-
-		cylinderVertex[3 * i]	  = radius * cosVal;
-		cylinderVertex[3 * i + 1] = radius * sinVal;
-		cylinderVertex[3 * i + 2] = 0;
-	}
+	int		  divisionNum	 = 6;
+	int		  vertexNum		 = 2 * (divisionNum + 1);
+	GLfloat * cylinderVertex = new GLfloat[3 * vertexNum];
+	createCylinder(cylinderVertex, 0.25f, divisionNum, 1.0f);
 
 	GLuint cylinderVAO;
 	glGenVertexArrays(1, &cylinderVAO);
@@ -70,7 +58,7 @@ void main()
 		objectShader.Use();
 		
 		glBindVertexArray(cylinderVAO);
-		glDrawArrays(GL_TRIANGLE_FAN, 0, vertexNum);
+		glDrawArrays(GL_LINE_STRIP, 0, vertexNum);
 		glBindVertexArray(0);
 
 		glfwSwapBuffers(window);
@@ -158,4 +146,29 @@ void key_callback(GLFWwindow * window, int key, int scancode, int action, int mo
 
 void mouse_callback(GLFWwindow * window, double xPos, double yPos)
 {
+}
+
+void createCylinder(GLfloat * cylinderVertices, float radius, int divisionNum, float length)
+{
+	// Create cylinder top
+	int		  vertexNum     = 2 * (divisionNum + 1);
+	GLfloat * cylinderColor = new GLfloat[3 * vertexNum];
+
+	for (int i = 0; i <= divisionNum; i++)
+	{
+		float	theta  = (float)i * 360.0f / (float)divisionNum;
+		float	cosVal = cos(theta * pi / 180);
+		float	sinVal = sin(theta * pi / 180);
+
+		int		indexTop	= 2 * 3 * i;			// 
+		int		indexBottom = indexTop + 3;			// 
+
+		cylinderVertices[indexTop]		  = radius * cosVal;
+		cylinderVertices[indexTop + 1]	  = -0.5f * length;
+		cylinderVertices[indexTop + 2]	  = radius * sinVal;
+
+		cylinderVertices[indexBottom]	  = radius * cosVal;
+		cylinderVertices[indexBottom + 1] = 0.5f * length;
+		cylinderVertices[indexBottom + 2] = radius * sinVal;
+	}
 }
