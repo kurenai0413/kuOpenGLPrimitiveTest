@@ -19,12 +19,8 @@ bool		 keyPressArray[1024];
 GLFWwindow * kuGLInit(const char * title, int xRes, int yRes);
 void		 key_callback(GLFWwindow * window, int key, int scancode, int action, int mode);
 void		 mouse_callback(GLFWwindow * window, double xPos, double yPos);
-void		 createCylinderModel(std::vector<GLfloat> &cylinderVertices, 
-								 std::vector<int> &cylinderSideIndices, std::vector<int> &cylinderTopIndices, std::vector<int> &cylinderBottomIndices,
-								 float radius, int divisionNum, float length);
 void		 createCylinderModel(std::vector<GLfloat> &cylinderVertices, std::vector<int> &cylinderIndices, float radius, int divisionNum, float length);
 void		 createCylinderVertices(std::vector<GLfloat> &cylinderVertices, float radius, const unsigned int divisionNum, float length);
-void		 createCylinderIndices(std::vector<int> &cylinderSideIndices, std::vector<int> &cylinderTopIndices, std::vector<int> &cylinderBottomIndices, const unsigned int divisionNum);
 void		 createCylinderIndices(std::vector<int> &cylinderIndices,const unsigned int divisionNum);
 
 void main()
@@ -37,19 +33,14 @@ void main()
 	int		  divisionNum	 = 36;
 	int		  vertexNum		 = 2 * (divisionNum + 1);
 	std::vector<GLfloat>	cylinderVertices;
-	//std::vector<int>		cylinderSideIndices, cylinderTopIndices, cylinderBottomIndices;
 	std::vector<int>		cylinderIndices;
-	//createCylinderModel(cylinderVertices, cylinderSideIndices, cylinderTopIndices, cylinderBottomIndices, 0.15f, divisionNum, 1.2f);
 	createCylinderModel(cylinderVertices, cylinderIndices, 0.15f, divisionNum, 1.2f);
-
-	//std::cout << "cylinderTopIndices.size(): " << cylinderTopIndices.size() << std::endl;
-	//std::cout << "cylinderBottomIndices.size(): " << cylinderBottomIndices.size() << std::endl;
 
 	GLuint cylinderVAO = 0;
 	glGenVertexArrays(1, &cylinderVAO);
 	GLuint cylinderVBO = 0;
 	glGenBuffers(1, &cylinderVBO);
-	GLuint cylinderEBO;					// Side, top, bottom
+	GLuint cylinderEBO;																
 	glGenBuffers(1, &cylinderEBO);
 
 	std::cout << "Number of vertices: " << cylinderVertices.size() << std::endl;
@@ -197,12 +188,6 @@ void mouse_callback(GLFWwindow * window, double xPos, double yPos)
 {
 }
 
-void createCylinderModel(std::vector<GLfloat>& cylinderVertices, std::vector<int> &cylinderSideIndices, std::vector<int> &cylinderTopIndices, std::vector<int> &cylinderBottomIndices, float radius, int divisionNum, float length)
-{
-	createCylinderVertices(cylinderVertices, radius, divisionNum, length);
-	createCylinderIndices(cylinderSideIndices, cylinderTopIndices, cylinderBottomIndices, divisionNum);
-}
-
 void createCylinderModel(std::vector<GLfloat>& cylinderVertices, std::vector<int>& cylinderIndices, float radius, int divisionNum, float length)
 {
 	createCylinderVertices(cylinderVertices, radius, divisionNum, length);
@@ -243,30 +228,6 @@ void createCylinderVertices(std::vector<GLfloat> &cylinderVertices, float radius
 	cylinderVertices.push_back(0.0f);
 	cylinderVertices.push_back(-0.5f * length);
 	cylinderVertices.push_back(0.0f);
-}
-
-void createCylinderIndices(std::vector<int> &cylinderSideIndices, std::vector<int> &cylinderTopIndices, std::vector<int> &cylinderBottomIndices, const unsigned int divisionNum)
-{
-	int vertexNumSide = 2 * (divisionNum + 1);					// in (divisionNum + 1): last = first
-	for (int i = 0; i < vertexNumSide; i++)
-	{
-		cylinderSideIndices.push_back(i);
-	}
-
-	int vertexNumTop = divisionNum + 1;							// divisionNum + center
-	cylinderTopIndices.push_back(2 * (divisionNum + 1));		// Center
-	for (int i = 0; i < divisionNum; i++)
-	{
-		cylinderTopIndices.push_back(2 * i);
-	}
-	cylinderTopIndices.push_back(0);							// Last = first
-
-	cylinderBottomIndices.push_back(2 * (divisionNum + 1) + 1); // Center
-	for (int i = 0; i < divisionNum; i++)
-	{
-		cylinderBottomIndices.push_back(2 * i + 1);
-	}
-	cylinderBottomIndices.push_back(1);							// Last = first
 }
 
 void createCylinderIndices(std::vector<int>& cylinderIndices, const unsigned int divisionNum)
