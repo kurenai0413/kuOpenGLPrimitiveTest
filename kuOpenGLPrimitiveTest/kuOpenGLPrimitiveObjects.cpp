@@ -45,7 +45,7 @@ void kuCylinderObject::CreateVertices()
 	if (m_Vertices.size() != 0)
 		m_Vertices.clear();
 
-	#pragma region // Setup top and bottom vertices //
+#pragma region // Setup top and bottom vertices //
 	std::vector<GLfloat> verticesTop;
 	std::vector<GLfloat> verticesBottom;
 	for (int i = 0; i <= m_DivisionNum; i++)
@@ -54,27 +54,26 @@ void kuCylinderObject::CreateVertices()
 		float	cosVal = cos(theta * pi / 180);
 		float	sinVal = sin(theta * pi / 180);
 
-		// Vertex positions
+		// Top vertices positions
 		verticesTop.push_back(m_Radius * cosVal);
 		verticesTop.push_back(0.5f * m_Length);
 		verticesTop.push_back(m_Radius * sinVal);
 
-		// Bottom
-		// Vertex positions
+		// Bottom vertex positions
 		verticesBottom.push_back(m_Radius * cosVal);
 		verticesBottom.push_back(-0.5f * m_Length);
 		verticesBottom.push_back(m_Radius * sinVal);
 	}
-	#pragma endregion
+#pragma endregion
 
-	#pragma region // Vertices for side strip //
+#pragma region // Vertices for side strip //
 	for (int i = 0; i <= m_DivisionNum; i++)
 	{
 		m_Vertices.push_back(verticesTop[3 * i]);
 		m_Vertices.push_back(verticesTop[3 * i + 1]);
 		m_Vertices.push_back(verticesTop[3 * i + 2]);
 
-		//// Normal
+		// Top circle normal
 		m_Vertices.push_back(verticesTop[3 * i]);
 		m_Vertices.push_back(0);
 		m_Vertices.push_back(verticesTop[3 * i + 2]);
@@ -83,14 +82,14 @@ void kuCylinderObject::CreateVertices()
 		m_Vertices.push_back(verticesBottom[3 * i + 1]);
 		m_Vertices.push_back(verticesBottom[3 * i + 2]);
 
-		//// Normal
+		// Bottom circle normal
 		m_Vertices.push_back(verticesBottom[3 * i]);
 		m_Vertices.push_back(0);
 		m_Vertices.push_back(verticesTop[3 * i + 2]);
 	}
-	#pragma endregion
+#pragma endregion
 
-	#pragma region // Vertices for top fan //
+#pragma region // Vertices for top fan //
 	// Top center
 	m_Vertices.push_back(0.0f);
 	m_Vertices.push_back(0.5f * m_Length);
@@ -106,14 +105,14 @@ void kuCylinderObject::CreateVertices()
 		m_Vertices.push_back(verticesTop[3 * i + 1]);
 		m_Vertices.push_back(verticesTop[3 * i + 2]);
 
-		//// Normal
+		// Top normal
 		m_Vertices.push_back(0.0f);
 		m_Vertices.push_back(1.0f);
 		m_Vertices.push_back(0.0f);
 	}
-	#pragma endregion
+#pragma endregion
 
-	#pragma region // Vertices for bottom fan //
+#pragma region // Vertices for bottom fan //
 	// Bottom center
 	m_Vertices.push_back(0.0f);
 	m_Vertices.push_back(0.5f * m_Length);
@@ -129,12 +128,12 @@ void kuCylinderObject::CreateVertices()
 		m_Vertices.push_back(verticesBottom[3 * i + 1]);
 		m_Vertices.push_back(verticesBottom[3 * i + 2]);
 
-		//// Normal
+		// Bottom normal
 		m_Vertices.push_back(0.0f);
 		m_Vertices.push_back(-1.0f);
 		m_Vertices.push_back(0.0f);
 	}
-	#pragma endregion
+#pragma endregion
 }
 
 void kuCylinderObject::CreateIndices()
@@ -187,7 +186,7 @@ void kuCylinderObject::CreateRenderBuffers()
 }
 #pragma endregion
 
-#pragma region // kuCubeObject //
+#pragma region // Cube object //
 kuCubeObject::kuCubeObject()
 {
 
@@ -234,7 +233,7 @@ void kuCubeObject::CreateRenderBuffers()
 }
 #pragma endregion
 
-#pragma region // kuConeObject //
+#pragma region // Cone object //
 kuConeObject::kuConeObject()
 {
 
@@ -275,11 +274,25 @@ void kuConeObject::Draw(kuShaderHandler shader)
 
 void kuConeObject::CreateVertices()
 {
-#pragma region // Assign sides vertices
-	m_Vertices.push_back(0.0f);								// Top X
-	m_Vertices.push_back(m_Length);							// Top Y
-	m_Vertices.push_back(0.0f);								// Top Z
-															// Normal
+	std::vector<GLfloat>	verticesBottom;
+	#pragma region // Set circle vertices //
+	for (int i = 0; i <= m_DivisionNum; i++)
+	{
+		float	theta = (float)i * 360.0f / (float)m_DivisionNum;
+		float	cosVal = cos(theta * pi / 180);
+		float	sinVal = sin(theta * pi / 180);
+
+		verticesBottom.push_back(m_Radius * cosVal);			// X
+		verticesBottom.push_back(0.0f);							// Y
+		verticesBottom.push_back(m_Radius * sinVal);			// Z
+	}
+	#pragma endregion
+
+	#pragma region // Assign sides vertices //
+	m_Vertices.push_back(0.0f);									// Top X
+	m_Vertices.push_back(m_Length);								// Top Y
+	m_Vertices.push_back(0.0f);									// Top Z
+																// Normal
 	m_Vertices.push_back(0.0f);
 	m_Vertices.push_back(1.0f);
 	m_Vertices.push_back(0.0f);
@@ -291,25 +304,39 @@ void kuConeObject::CreateVertices()
 		float	cosVal = cos(theta * pi / 180);
 		float	sinVal = sin(theta * pi / 180);
 
-		m_Vertices.push_back(m_Radius * cosVal);			// X
-		m_Vertices.push_back(0.0f);							// Y
-		m_Vertices.push_back(m_Radius * sinVal);			// Z
-
-															// Normal
+		m_Vertices.push_back(verticesBottom[3 * i]);			// X
+		m_Vertices.push_back(verticesBottom[3 * i + 1]);		// Y
+		m_Vertices.push_back(verticesBottom[3 * i + 2]);		// Z
+																// Normal
 		m_Vertices.push_back(cosVal);
 		m_Vertices.push_back(0.0f);
 		m_Vertices.push_back(sinVal);
 	}
-#pragma region
+	#pragma endregion
 
 	// Assign bottom center vertex
-	m_Vertices.push_back(0.0f);								// X
-	m_Vertices.push_back(0.0f);								// Y
-	m_Vertices.push_back(0.0f);								// Z
-															// Normal
-	m_Vertices.push_back(0.0f);								// X
-	m_Vertices.push_back(-1.0f);							// Y
-	m_Vertices.push_back(0.0f);								// Z
+	m_Vertices.push_back(0.0f);									// X
+	m_Vertices.push_back(0.0f);									// Y
+	m_Vertices.push_back(0.0f);									// Z
+	// Normal
+	m_Vertices.push_back(0.0f);									// X
+	m_Vertices.push_back(-1.0f);								// Y
+	m_Vertices.push_back(0.0f);									// Z
+
+	for (int i = 0; i <= m_DivisionNum; i++)
+	{
+		float	theta  = (float)i * 360.0f / (float)m_DivisionNum;
+		float	cosVal = cos(theta * pi / 180);
+		float	sinVal = sin(theta * pi / 180);
+
+		m_Vertices.push_back(verticesBottom[3 * i]);			// X
+		m_Vertices.push_back(verticesBottom[3 * i + 1]);		// Y
+		m_Vertices.push_back(verticesBottom[3 * i + 2]);		// Z
+		// Normal
+		m_Vertices.push_back(cosVal);
+		m_Vertices.push_back(-1.0f);
+		m_Vertices.push_back(sinVal);
+	}
 }
 
 void kuConeObject::CreateIndices()
