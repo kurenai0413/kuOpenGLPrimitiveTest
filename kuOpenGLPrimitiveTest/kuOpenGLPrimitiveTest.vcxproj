@@ -112,10 +112,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="kuOpenGLPrimitiveObjects.cpp" />
     <ClCompile Include="kuOpenGLPrimitiveTest.cpp" />
     <ClCompile Include="kuShaderHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="kuOpenGLPrimitiveObjects.h" />
     <ClInclude Include="kuShaderHandler.h" />
   </ItemGroup>
   <ItemGroup>

@@ -81,15 +81,15 @@ void kuShaderHandler::Load(const char * VSPathName, const char * FSPathName)
 	}
 
 	// Shader Program
-	this->ShaderProgramID = glCreateProgram();
-	glAttachShader(this->ShaderProgramID, VertexShader);
-	glAttachShader(this->ShaderProgramID, FragmentShader);
-	glLinkProgram(this->ShaderProgramID);
+	this->m_ShaderProgramID = glCreateProgram();
+	glAttachShader(this->m_ShaderProgramID, VertexShader);
+	glAttachShader(this->m_ShaderProgramID, FragmentShader);
+	glLinkProgram(this->m_ShaderProgramID);
 	// Print linking errors if any
-	glGetProgramiv(this->ShaderProgramID, GL_LINK_STATUS, &success);
+	glGetProgramiv(this->m_ShaderProgramID, GL_LINK_STATUS, &success);
 	if (!success)
 	{
-		glGetProgramInfoLog(this->ShaderProgramID, 512, NULL, infoLog);
+		glGetProgramInfoLog(this->m_ShaderProgramID, 512, NULL, infoLog);
 		std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
 	}
 
@@ -97,13 +97,18 @@ void kuShaderHandler::Load(const char * VSPathName, const char * FSPathName)
 	glDeleteShader(VertexShader);
 	glDeleteShader(FragmentShader);
 
-	isShaderCreated = true;
+	m_fShaderCreated = true;
 }
 
 void kuShaderHandler::Use()
 {
-	if (isShaderCreated)
+	if (m_fShaderCreated)
 	{
-		glUseProgram(this->ShaderProgramID);
+		glUseProgram(this->m_ShaderProgramID);
 	}
+}
+
+GLuint kuShaderHandler::GetShaderProgramID()
+{
+	return m_ShaderProgramID;
 }

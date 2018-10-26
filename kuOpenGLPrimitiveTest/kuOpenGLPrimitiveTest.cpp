@@ -9,76 +9,57 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "kuShaderHandler.h"
+#include "kuOpenGLPrimitiveObjects.h"
 
 #define pi			3.1415926
 #define WND_WIDTH	1024
 #define WND_HEIGHT	768
 
+#define cylinderNum 100000
+
 bool		 keyPressArray[1024];
 
-GLFWwindow * kuGLInit(const char * title, int xRes, int yRes);
-void		 key_callback(GLFWwindow * window, int key, int scancode, int action, int mode);
-void		 mouse_callback(GLFWwindow * window, double xPos, double yPos);
-void		 createCylinderModel(std::vector<GLfloat> &cylinderVertices, std::vector<int> &cylinderIndices, float radius, int divisionNum, float length);
-void		 createCylinderVertices(std::vector<GLfloat> &cylinderVertices, float radius, const unsigned int divisionNum, float length);
-void		 createCylinderIndices(std::vector<int> &cylinderIndices,const unsigned int divisionNum);
+GLFWwindow				*	kuGLInit(const char * title, int xRes, int yRes);
+void						key_callback(GLFWwindow * window, int key, int scancode, int action, int mode);
+void						mouse_callback(GLFWwindow * window, double xPos, double yPos);
+void						createCylinderModel(std::vector<GLfloat> &cylinderVertices, std::vector<int> &cylinderIndices, float radius, int divisionNum, float length);
+void						createCylinderVertices(std::vector<GLfloat> &cylinderVertices, float radius, const unsigned int divisionNum, float length);
+void						createCylinderIndices(std::vector<int> &cylinderIndices,const unsigned int divisionNum);
 
 void main()
 {
-	GLFWwindow		*	window = kuGLInit("kuOpenGLTest", WND_WIDTH, WND_HEIGHT);
+	GLFWwindow			*	window = kuGLInit("kuOpenGLTest", WND_WIDTH, WND_HEIGHT);
 
-	kuShaderHandler		objectShader;
+	kuShaderHandler			objectShader;
 	objectShader.Load("VertexShader.vert", "FragmentShader.frag");
 
-	int		  divisionNum	 = 36;
-	int		  vertexNum		 = 2 * (divisionNum + 1);
-	std::vector<GLfloat>	cylinderVertices;
-	std::vector<int>		cylinderIndices;
-	createCylinderModel(cylinderVertices, cylinderIndices, 0.15f, divisionNum, 1.2f);
+	kuCylinderObject		cylinderObj(0.15f, 1.2f);
+	kuConeObject			coneObj(0.15f, 0.5f);
 
-	GLuint cylinderVAO = 0;
-	glGenVertexArrays(1, &cylinderVAO);
-	GLuint cylinderVBO = 0;
-	glGenBuffers(1, &cylinderVBO);
-	GLuint cylinderEBO;																
-	glGenBuffers(1, &cylinderEBO);
+	glm::vec3				cameraPos		 = glm::vec3(1.0f, 0.5f, -1.0f);
+	glm::vec3				cameraTarget	 = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3				cameraDirection  = glm::normalize(cameraPos - cameraTarget);
+	glm::vec3				worldUp			 = glm::vec3(0.0f, 1.0f, 0.0f);
+	glm::vec3				cameraRight		 = glm::normalize(glm::cross(worldUp, cameraDirection));
+	glm::vec3				cameraUp		 = glm::cross(cameraDirection, cameraRight);
 
-	std::cout << "Number of vertices: " << cylinderVertices.size() << std::endl;
-	std::cout << "Number of indices: " << cylinderIndices.size() << std::endl;
-
-	glBindVertexArray(cylinderVAO);
-	glBindBuffer(GL_ARRAY_BUFFER, cylinderVBO);
-	glBufferData(GL_ARRAY_BUFFER, cylinderVertices.size() * sizeof(GLfloat), &cylinderVertices[0], GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
-	glEnableVertexAttribArray(0);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cylinderEBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, cylinderIndices.size() * sizeof(int), &cylinderIndices[0], GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-
-	glm::vec3	 cameraPos		 = glm::vec3(1.0f, 1.0f, -1.0f);
-	glm::vec3	 cameraTarget	 = glm::vec3(0.0f, 0.0f, 0.0f);
-	glm::vec3	 cameraDirection = glm::normalize(cameraPos - cameraTarget);
-	glm::vec3	 worldUp		 = glm::vec3(0.0f, 1.0f, 0.0f);
-	glm::vec3	 cameraRight	 = glm::normalize(glm::cross(worldUp, cameraDirection));
-	glm::vec3	 cameraUp		 = glm::cross(cameraDirection, cameraRight);
-
-	glm::mat4	 modelMat;
-	glm::mat4	 projectionMat	 = glm::perspective(glm::radians(45.0f), (float)WND_WIDTH/(float)WND_HEIGHT, 0.1f, 100.0f);
-	glm::mat4	 viewMat		 = glm::lookAt(cameraPos, cameraTarget, cameraUp);
+	glm::mat4				modelMat;
+	glm::mat4				projectionMat	 = glm::perspective(glm::radians(45.0f), (float)WND_WIDTH/(float)WND_HEIGHT, 0.1f, 100.0f);
+	glm::mat4				viewMat			 = glm::lookAt(cameraPos, cameraTarget, cameraUp);
 
 	objectShader.Use();
 
 	GLuint modelMatLoc, viewMatLoc, projectionMatLoc;
-	modelMatLoc = glGetUniformLocation(objectShader.ShaderProgramID, "model");
+	GLuint cameraPosLoc;
+	modelMatLoc = glGetUniformLocation(objectShader.GetShaderProgramID(), "model");
 	glUniformMatrix4fv(modelMatLoc, 1, GL_FALSE, glm::value_ptr(modelMat));
-	viewMatLoc = glGetUniformLocation(objectShader.ShaderProgramID, "view");
+	viewMatLoc = glGetUniformLocation(objectShader.GetShaderProgramID(), "view");
 	glUniformMatrix4fv(viewMatLoc, 1, GL_FALSE, glm::value_ptr(viewMat));
-	projectionMatLoc = glGetUniformLocation(objectShader.ShaderProgramID, "projection");
+	projectionMatLoc = glGetUniformLocation(objectShader.GetShaderProgramID(), "projection");
 	glUniformMatrix4fv(projectionMatLoc, 1, GL_FALSE, glm::value_ptr(projectionMat));
+
+	cameraPosLoc = glGetUniformLocation(objectShader.GetShaderProgramID(), "cameraPos");
+	glUniform3fv(cameraPosLoc, 1, glm::value_ptr(cameraPos));
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -90,12 +71,8 @@ void main()
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		glBindVertexArray(cylinderVAO);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cylinderEBO);
-		glDrawElements(GL_TRIANGLE_STRIP, vertexNum, GL_UNSIGNED_INT, 0);
-		glDrawElements(GL_TRIANGLE_FAN, divisionNum + 2, GL_UNSIGNED_INT, (GLvoid*)((vertexNum) * sizeof(int)));
-		glDrawElements(GL_TRIANGLE_FAN, divisionNum + 2, GL_UNSIGNED_INT, (GLvoid*)((vertexNum + divisionNum + 2) * sizeof(int)));
-		glBindVertexArray(0);
+		cylinderObj.Draw(objectShader);
+		//coneObj.Draw(objectShader);
 
 		glfwSwapBuffers(window);
 	}
@@ -127,7 +104,7 @@ GLFWwindow * kuGLInit(const char * title, int xRes, int yRes)
 	glfwSetKeyCallback(window, key_callback);
 
 	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	//glfwSetCursorPosCallback(window, mouse_callback);				// 顧名思義...大概只有位置資訊而沒有button事件資訊吧
+	//glfwSetCursorPosCallback(window, mouse_callback);					// 顧名思義...大概只有位置資訊而沒有button事件資訊吧
 
 	// need to create OpenGL window before glew initialization.
 	//glewExperimental = GL_TRUE;
@@ -209,36 +186,54 @@ void createCylinderVertices(std::vector<GLfloat> &cylinderVertices, float radius
 		float	sinVal = sin(theta * pi / 180);
 
 		// Top
+		// Vertex positions
 		cylinderVertices.push_back(radius * cosVal);
 		cylinderVertices.push_back(0.5f * length);
 		cylinderVertices.push_back(radius * sinVal);
+		// Normal
+		cylinderVertices.push_back(cosVal);
+		cylinderVertices.push_back(0);
+		cylinderVertices.push_back(sinVal);
 		
 		// Bottom
+		// Vertex positions
 		cylinderVertices.push_back(radius * cosVal);
 		cylinderVertices.push_back(-0.5f * length);
 		cylinderVertices.push_back(radius * sinVal);
+		// Normal
+		cylinderVertices.push_back(cosVal);
+		cylinderVertices.push_back(0);
+		cylinderVertices.push_back(sinVal);
 	}
 
 	// Top center
 	cylinderVertices.push_back(0.0f);
 	cylinderVertices.push_back(0.5f * length);
-	cylinderVertices.push_back(0);
+	cylinderVertices.push_back(0.0f);
+	// Top center normal
+	cylinderVertices.push_back(0.0f);
+	cylinderVertices.push_back(1.0f);
+	cylinderVertices.push_back(0.0f);
 
 	// Bottom center
 	cylinderVertices.push_back(0.0f);
 	cylinderVertices.push_back(-0.5f * length);
 	cylinderVertices.push_back(0.0f);
+	// Bottom center normal
+	cylinderVertices.push_back(0.0f);
+	cylinderVertices.push_back(-1.0f);
+	cylinderVertices.push_back(0.0f);
 }
 
 void createCylinderIndices(std::vector<int>& cylinderIndices, const unsigned int divisionNum)
 {
-	int vertexNumSide = 2 * (divisionNum + 1);					// in (divisionNum + 1): last = first
+	int vertexNumSide = 2 * (divisionNum + 1);				// in (divisionNum + 1): last = first
 	for (int i = 0; i < vertexNumSide; i++)
 	{
 		cylinderIndices.push_back(i);
 	}
 
-	int vertexNumTop = divisionNum + 1;							// divisionNum + center
+	int vertexNumTop = divisionNum + 1;						// divisionNum + center
 	cylinderIndices.push_back(2 * (divisionNum + 1));		// Center
 	for (int i = 0; i < divisionNum; i++)
 	{

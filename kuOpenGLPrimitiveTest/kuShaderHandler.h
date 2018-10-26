@@ -15,14 +15,14 @@ public:
 	kuShaderHandler(const char * VSPathName, const char * FSPathName);		// Vertex Shader, Fragment Shader
 	~kuShaderHandler();
 
-	GLuint	ShaderProgramID;
-
 	void	Load(const char * VSPathName, const char * FSPathName);
 	void	Use();
+	GLuint	GetShaderProgramID();
 
 private:
 
-	bool	isShaderCreated;
+	GLuint	m_ShaderProgramID;
+	bool	m_fShaderCreated;
 };
 
 #endif
