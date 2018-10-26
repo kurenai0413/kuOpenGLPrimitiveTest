@@ -17,7 +17,7 @@
 
 #define cylinderNum 100000
 
-bool		 keyPressArray[1024];
+bool						keyPressArray[1024];
 
 GLFWwindow				*	kuGLInit(const char * title, int xRes, int yRes);
 void						key_callback(GLFWwindow * window, int key, int scancode, int action, int mode);
@@ -33,10 +33,10 @@ void main()
 	kuShaderHandler			objectShader;
 	objectShader.Load("VertexShader.vert", "FragmentShader.frag");
 
-	kuCylinderObject		cylinderObj(0.15f, 1.2f);
+	kuCylinderObject		cylinderObj(0.15f, 0.5f);
 	kuConeObject			coneObj(0.15f, 0.5f);
 
-	glm::vec3				cameraPos		 = glm::vec3(1.0f, 0.5f, -1.0f);
+	glm::vec3				cameraPos		 = glm::vec3(1.0f, 2.0f, -1.0f);
 	glm::vec3				cameraTarget	 = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3				cameraDirection  = glm::normalize(cameraPos - cameraTarget);
 	glm::vec3				worldUp			 = glm::vec3(0.0f, 1.0f, 0.0f);
