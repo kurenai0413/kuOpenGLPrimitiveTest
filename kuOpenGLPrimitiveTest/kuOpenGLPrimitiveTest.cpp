@@ -48,10 +48,8 @@ void main()
 
 	objectShader.Use();
 
-	GLuint modelMatLoc, viewMatLoc, projectionMatLoc;
+	GLuint viewMatLoc, projectionMatLoc;
 	GLuint cameraPosLoc;
-	modelMatLoc = glGetUniformLocation(objectShader.GetShaderProgramID(), "model");
-	glUniformMatrix4fv(modelMatLoc, 1, GL_FALSE, glm::value_ptr(modelMat));
 	viewMatLoc = glGetUniformLocation(objectShader.GetShaderProgramID(), "view");
 	glUniformMatrix4fv(viewMatLoc, 1, GL_FALSE, glm::value_ptr(viewMat));
 	projectionMatLoc = glGetUniformLocation(objectShader.GetShaderProgramID(), "projection");
@@ -59,6 +57,8 @@ void main()
 
 	cameraPosLoc = glGetUniformLocation(objectShader.GetShaderProgramID(), "cameraPos");
 	glUniform3fv(cameraPosLoc, 1, glm::value_ptr(cameraPos));
+
+	cylinderObj.SetPosition(0.0f, 2.0f, 0.0f);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -70,7 +70,6 @@ void main()
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		cylinderObj.SetPosition(0.0f, 0.0f, 0.0f);
 		cylinderObj.Draw(objectShader);
 		//coneObj.Draw(objectShader);
 		//sphereObj.Draw(objectShader);
