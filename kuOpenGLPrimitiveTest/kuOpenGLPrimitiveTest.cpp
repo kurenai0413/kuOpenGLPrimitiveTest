@@ -22,9 +22,6 @@ bool						keyPressArray[1024];
 GLFWwindow				*	kuGLInit(const char * title, int xRes, int yRes);
 void						key_callback(GLFWwindow * window, int key, int scancode, int action, int mode);
 void						mouse_callback(GLFWwindow * window, double xPos, double yPos);
-void						createCylinderModel(std::vector<GLfloat> &cylinderVertices, std::vector<int> &cylinderIndices, float radius, int divisionNum, float length);
-void						createCylinderVertices(std::vector<GLfloat> &cylinderVertices, float radius, const unsigned int divisionNum, float length);
-void						createCylinderIndices(std::vector<int> &cylinderIndices,const unsigned int divisionNum);
 
 void main()
 {
@@ -37,7 +34,7 @@ void main()
 	kuConeObject			coneObj(0.1f, 0.5f);
 	kuSphereObject			sphereObj(0.5f);
 
-	glm::vec3				cameraPos		 = glm::vec3(0.0f, 2.0f, -3.0f);
+	glm::vec3				cameraPos		 = glm::vec3(0.0f, 0.0f, -10.0f);
 	glm::vec3				cameraTarget	 = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3				cameraFront		 = glm::normalize(cameraPos - cameraTarget);
 	glm::vec3				worldUp			 = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -165,88 +162,4 @@ void key_callback(GLFWwindow * window, int key, int scancode, int action, int mo
 
 void mouse_callback(GLFWwindow * window, double xPos, double yPos)
 {
-}
-
-void createCylinderModel(std::vector<GLfloat>& cylinderVertices, std::vector<int>& cylinderIndices, float radius, int divisionNum, float length)
-{
-	createCylinderVertices(cylinderVertices, radius, divisionNum, length);
-	createCylinderIndices(cylinderIndices, divisionNum);
-}
-
-void createCylinderVertices(std::vector<GLfloat> &cylinderVertices, float radius, const unsigned int divisionNum, float length)
-{
-	if (cylinderVertices.size() != 0)
-		cylinderVertices.clear();
-
-	// Create cylinder top
-	int		  vertexNum = 2 * (divisionNum + 1);
-
-	for (int i = 0; i <= divisionNum; i++)
-	{
-		float	theta = (float)i * 360.0f / (float)divisionNum;
-		float	cosVal = cos(theta * pi / 180);
-		float	sinVal = sin(theta * pi / 180);
-
-		// Top
-		// Vertex positions
-		cylinderVertices.push_back(radius * cosVal);
-		cylinderVertices.push_back(0.5f * length);
-		cylinderVertices.push_back(radius * sinVal);
-		// Normal
-		cylinderVertices.push_back(cosVal);
-		cylinderVertices.push_back(0);
-		cylinderVertices.push_back(sinVal);
-		
-		// Bottom
-		// Vertex positions
-		cylinderVertices.push_back(radius * cosVal);
-		cylinderVertices.push_back(-0.5f * length);
-		cylinderVertices.push_back(radius * sinVal);
-		// Normal
-		cylinderVertices.push_back(cosVal);
-		cylinderVertices.push_back(0);
-		cylinderVertices.push_back(sinVal);
-	}
-
-	// Top center
-	cylinderVertices.push_back(0.0f);
-	cylinderVertices.push_back(0.5f * length);
-	cylinderVertices.push_back(0.0f);
-	// Top center normal
-	cylinderVertices.push_back(0.0f);
-	cylinderVertices.push_back(1.0f);
-	cylinderVertices.push_back(0.0f);
-
-	// Bottom center
-	cylinderVertices.push_back(0.0f);
-	cylinderVertices.push_back(-0.5f * length);
-	cylinderVertices.push_back(0.0f);
-	// Bottom center normal
-	cylinderVertices.push_back(0.0f);
-	cylinderVertices.push_back(-1.0f);
-	cylinderVertices.push_back(0.0f);
-}
-
-void createCylinderIndices(std::vector<int>& cylinderIndices, const unsigned int divisionNum)
-{
-	int vertexNumSide = 2 * (divisionNum + 1);				// in (divisionNum + 1): last = first
-	for (int i = 0; i < vertexNumSide; i++)
-	{
-		cylinderIndices.push_back(i);
-	}
-
-	int vertexNumTop = divisionNum + 1;						// divisionNum + center
-	cylinderIndices.push_back(2 * (divisionNum + 1));		// Center
-	for (int i = 0; i < divisionNum; i++)
-	{
-		cylinderIndices.push_back(2 * i);
-	}
-	cylinderIndices.push_back(0);							// Last = first
-
-	cylinderIndices.push_back(2 * (divisionNum + 1) + 1); // Center
-	for (int i = 0; i < divisionNum; i++)
-	{
-		cylinderIndices.push_back(2 * i + 1);
-	}
-	cylinderIndices.push_back(1);							// Last = first
 }

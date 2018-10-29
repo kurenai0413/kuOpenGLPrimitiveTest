@@ -25,7 +25,7 @@ protected:
 	int						m_VerticesNum;
 
 	virtual void			CreateModel()		  = 0;
-	virtual void			CreateRenderBuffers() = 0;
+	void					CreateRenderBuffers();
 };
 
 class kuCylinderObject : kuGLPrimitiveObject
@@ -44,7 +44,6 @@ protected:
 	float					m_Length;
 
 	void					CreateModel();
-	void					CreateRenderBuffers();
 };
 
 class kuCubeObject : kuGLPrimitiveObject
@@ -97,7 +96,6 @@ protected:
 	float					m_Length;
 
 	void					CreateModel();
-	void					CreateRenderBuffers();
 };
 
 class kuSphereObject : kuGLPrimitiveObject
@@ -117,5 +115,4 @@ protected:
 	float					m_Radius;
 	
 	void					CreateModel();
-	void					CreateRenderBuffers();
 };

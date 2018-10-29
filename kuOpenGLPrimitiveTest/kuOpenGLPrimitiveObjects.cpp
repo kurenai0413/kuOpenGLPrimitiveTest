@@ -7,6 +7,28 @@
 #define pi			3.1415926
 #define VertexSize	6			// 3 for position and 3 for normal
 
+void kuGLPrimitiveObject::CreateRenderBuffers()
+{
+	glGenVertexArrays(1, &m_VAO);
+	glGenBuffers(1, &m_VBO);
+	glGenBuffers(1, &m_EBO);
+
+	glBindVertexArray(m_VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+	glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(GLfloat), &m_Vertices[0], GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(1);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(int), &m_Indices[0], GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+}
+
 #pragma region // Cylinder object //
 kuCylinderObject::kuCylinderObject()
 {
@@ -164,30 +186,6 @@ void kuCylinderObject::CreateModel()
 	}
 	#pragma endregion
 }
-
-void kuCylinderObject::CreateRenderBuffers()
-{
-	glGenVertexArrays(1, &m_VAO);
-	glGenBuffers(1, &m_VBO);
-	glGenBuffers(1, &m_EBO);
-
-	glBindVertexArray(m_VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-	glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(GLfloat), &m_Vertices[0], GL_STATIC_DRAW);
-
-	// Vertices
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VertexSize * sizeof(GLfloat), (GLvoid*)0);
-	glEnableVertexAttribArray(0);
-	// Normals
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, VertexSize * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(1);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(int), &m_Indices[0], GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-}
 #pragma endregion
 
 #pragma region // Cube object //
@@ -311,7 +309,7 @@ void kuConeObject::CreateModel()
 		m_Vertices.push_back(verticesBottom[3 * (m_DivisionNum - i)]);			// X
 		m_Vertices.push_back(verticesBottom[3 * (m_DivisionNum - i) + 1]);		// Y
 		m_Vertices.push_back(verticesBottom[3 * (m_DivisionNum - i) + 2]);		// Z
-																// Normal
+		// Normal
 		m_Vertices.push_back(0);
 		m_Vertices.push_back(-1.0f);
 		m_Vertices.push_back(0);
@@ -320,7 +318,7 @@ void kuConeObject::CreateModel()
 	}
 	#pragma endregion
 
-	#pragma region // Set bottom face vertices and indcies: (m_DivisionNum + 2) ~  (m_DivisionNum + 2) + 2 * (m_DivisionNum + 1) - 1 //
+	#pragma region // Set bottom face vertices and indcies: (m_DivisionNum + 2) ~ (m_DivisionNum + 2) + 2 * (m_DivisionNum + 1) - 1 //
 	// Side triangle strip vertices.
 	for (int i = 0; i <= m_DivisionNum; i++)
 	{
@@ -363,28 +361,6 @@ void kuConeObject::CreateModel()
 		m_Indices.push_back(m_Vertices.size() / VertexSize - 1);
 	}
 	#pragma endregion
-}
-
-void kuConeObject::CreateRenderBuffers()
-{
-	glGenVertexArrays(1, &m_VAO);
-	glGenBuffers(1, &m_VBO);
-	glGenBuffers(1, &m_EBO);
-
-	glBindVertexArray(m_VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-	glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(GLfloat), &m_Vertices[0], GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(1);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(int), &m_Indices[0], GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
 }
 #pragma endregion
 
@@ -507,27 +483,5 @@ void kuSphereObject::CreateModel()
 		}
 	}
 	#pragma endregion
-}
-
-void kuSphereObject::CreateRenderBuffers()
-{
-	glGenVertexArrays(1, &m_VAO);
-	glGenBuffers(1, &m_VBO);
-	glGenBuffers(1, &m_EBO);
-
-	glBindVertexArray(m_VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-	glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(GLfloat), &m_Vertices[0], GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(1);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(int), &m_Indices[0], GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
 }
 #pragma endregion
