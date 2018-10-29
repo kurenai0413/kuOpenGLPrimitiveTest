@@ -19,6 +19,8 @@ public:
 	void	Use();
 	GLuint	GetShaderProgramID();
 
+	kuShaderHandler& operator=(kuShaderHandler &rhs);
+
 private:
 
 	GLuint	m_ShaderProgramID;

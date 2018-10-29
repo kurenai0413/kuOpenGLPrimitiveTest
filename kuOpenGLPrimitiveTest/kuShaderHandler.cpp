@@ -112,3 +112,12 @@ GLuint kuShaderHandler::GetShaderProgramID()
 {
 	return m_ShaderProgramID;
 }
+
+kuShaderHandler & kuShaderHandler::operator=(kuShaderHandler & rhs)
+{
+	// TODO: 於此處插入傳回陳述式
+	this->m_ShaderProgramID = rhs.m_ShaderProgramID;
+	this->m_fShaderCreated = rhs.m_fShaderCreated;
+	
+	return *this;
+}

@@ -2,6 +2,10 @@
 #include <iostream>
 #include <vector>
 
+#include <GLM/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include "kuShaderHandler.h"
 
 // Abstract class
@@ -9,10 +13,16 @@ class kuGLPrimitiveObject
 {
 public:
 	virtual void			Draw(kuShaderHandler shader) = 0;
+	void					SetShader(kuShaderHandler shader);
+	void					SetPosition(float xPos, float yPos, float zPos);
+	void					SetColor(float R, float G, float B, float alpha);
 
 protected:
 	std::vector<GLfloat>	m_Vertices;
 	std::vector<int>		m_Indices;
+
+	glm::mat4				m_ModelMat;
+	kuShaderHandler			m_Shader;
 
 	GLuint					m_VAO;							// Vertex array object
 	GLuint					m_VBO;							// Vertex buffer object
@@ -28,7 +38,7 @@ protected:
 	void					CreateRenderBuffers();
 };
 
-class kuCylinderObject : kuGLPrimitiveObject
+class kuCylinderObject : public kuGLPrimitiveObject
 {
 public:
 	kuCylinderObject();

@@ -1,11 +1,28 @@
 #include "kuOpenGLPrimitiveObjects.h"
 
-#include <GLM/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
 #define pi			3.1415926
 #define VertexSize	6			// 3 for position and 3 for normal
+
+void kuGLPrimitiveObject::SetShader(kuShaderHandler shader)
+{
+	m_Shader = shader;
+}
+
+void kuGLPrimitiveObject::SetPosition(float xPos, float yPos, float zPos)
+{
+	m_ModelMat = glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
+						   0.0f, 1.0f, 0.0f, 0.0f,
+						   0.0f, 0.0f, 1.0f, 0.0f,
+						   xPos, yPos, zPos, 1.0);
+
+	m_Shader.Use();
+	GLuint modelMatLoc = glGetUniformLocation(m_Shader.GetShaderProgramID(), "model");
+	glUniformMatrix4fv(modelMatLoc, 1, GL_FALSE, glm::value_ptr(m_ModelMat));
+}
+
+void kuGLPrimitiveObject::SetColor(float R, float G, float B, float alpha)
+{
+}
 
 void kuGLPrimitiveObject::CreateRenderBuffers()
 {
