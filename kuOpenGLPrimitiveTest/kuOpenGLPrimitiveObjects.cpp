@@ -43,7 +43,7 @@ const GLchar * fragmentShaderSource =
 "vec3 lightDir = normalize(lightPos - vertexPosition);\n"
 "float diff = max(dot(norm, lightDir), 0.0);\n"
 "vec3 diffuse = diff * lightColor;\n"
-"outColor = vec4((ambient + diffuse) * objColor, 0.5f);\n"
+"outColor = vec4((ambient + diffuse) * objColor, objectColor.a);\n"
 "}\n";
 
 void kuGLPrimitiveObject::SetCameraConfiguration(glm::mat4 projectionMat, glm::mat4 viewMat, glm::vec3 cameraPos)
