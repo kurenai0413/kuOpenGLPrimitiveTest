@@ -18,6 +18,10 @@ protected:
 	GLuint					m_VBO;							// Vertex buffer object
 	GLuint					m_EBO;							// Element buffer object
 
+	GLfloat					m_XPos				  = 0;
+	GLfloat					m_YPos				  = 0;
+	GLfloat					m_ZPos				  = 0;
+
 	int						m_VerticesNum;
 
 	virtual void			CreateModel()		  = 0;

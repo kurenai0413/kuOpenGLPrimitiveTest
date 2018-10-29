@@ -1,6 +1,7 @@
 #include "kuOpenGLPrimitiveObjects.h"
 
-#define pi 3.1415926
+#define pi			3.1415926
+#define VertexSize	6			// 3 for position and 3 for normal
 
 #pragma region // Cylinder object //
 kuCylinderObject::kuCylinderObject()
@@ -50,6 +51,7 @@ void kuCylinderObject::CreateModel()
 	#pragma region // Generate top and bottom vertices //
 	std::vector<GLfloat> verticesTop;
 	std::vector<GLfloat> verticesBottom;
+
 	for (int i = 0; i <= m_DivisionNum; i++)
 	{
 		float	theta = -((float)i * 360.0f / (float)m_DivisionNum);
@@ -72,30 +74,29 @@ void kuCylinderObject::CreateModel()
 	// Side triangle strip vertices.
 	for (int i = 0; i <= m_DivisionNum; i++)
 	{
+		// Top circle vertex
 		m_Vertices.push_back(verticesTop[3 * i]);
 		m_Vertices.push_back(verticesTop[3 * i + 1]);
 		m_Vertices.push_back(verticesTop[3 * i + 2]);
-
 		// Top circle normal
 		m_Vertices.push_back(verticesTop[3 * i]);
 		m_Vertices.push_back(0);
 		m_Vertices.push_back(verticesTop[3 * i + 2]);
 
+		// Index
+		m_Indices.push_back(m_Vertices.size() / VertexSize - 1);
+
+		// Bottom circle vertex
 		m_Vertices.push_back(verticesBottom[3 * i]);
 		m_Vertices.push_back(verticesBottom[3 * i + 1]);
 		m_Vertices.push_back(verticesBottom[3 * i + 2]);
-
 		// Bottom circle normal
 		m_Vertices.push_back(verticesBottom[3 * i]);
 		m_Vertices.push_back(0);
 		m_Vertices.push_back(verticesTop[3 * i + 2]);
-	}
-
-	// Side triangle strip indices: 0 ~ 2 * (m_DivisionNum + 1).
-	int vertexNumSide = 2 * (m_DivisionNum + 1);
-	for (int i = 0; i < vertexNumSide; i++)
-	{
-		m_Indices.push_back(i);
+	
+		// Index
+		m_Indices.push_back(m_Vertices.size() / VertexSize - 1);
 	}
 	#pragma endregion
 
@@ -110,7 +111,7 @@ void kuCylinderObject::CreateModel()
 	m_Vertices.push_back(0.0f);
 
 	// Set top center index
-	m_Indices.push_back(2 * (m_DivisionNum + 1));
+	m_Indices.push_back(m_Vertices.size() / VertexSize - 1);
 
 	int topStride = 2 * (m_DivisionNum + 1) + 1;
 	for (int i = 0; i <= m_DivisionNum; i++)
@@ -125,7 +126,7 @@ void kuCylinderObject::CreateModel()
 		m_Vertices.push_back(0.0f);
 
 		// Indices
-		m_Indices.push_back((2 * (m_DivisionNum + 1) + 1) + i);
+		m_Indices.push_back(m_Vertices.size() / VertexSize - 1);
 	}
 	#pragma endregion
 
@@ -140,10 +141,11 @@ void kuCylinderObject::CreateModel()
 	m_Vertices.push_back(0.0f);
 
 	// Set bottom center index
-	m_Indices.push_back(2 * (m_DivisionNum + 1) + (m_DivisionNum + 2));
+	m_Indices.push_back(m_Vertices.size() / VertexSize - 1);
 
 	for (int i = 0; i <= m_DivisionNum; i++)
 	{
+		// Bottom vertex
 		m_Vertices.push_back(verticesBottom[3 * (m_DivisionNum - i)]);
 		m_Vertices.push_back(verticesBottom[3 * (m_DivisionNum - i) + 1]);
 		m_Vertices.push_back(verticesBottom[3 * (m_DivisionNum - i) + 2]);
@@ -152,8 +154,9 @@ void kuCylinderObject::CreateModel()
 		m_Vertices.push_back(0.0f);
 		m_Vertices.push_back(-1.0f);
 		m_Vertices.push_back(0.0f);
-
-		m_Indices.push_back((2 * (m_DivisionNum + 1) + (m_DivisionNum + 2) + 1) + i);
+		
+		// Index
+		m_Indices.push_back(m_Vertices.size() / VertexSize - 1);
 	}
 	#pragma endregion
 }
@@ -168,9 +171,9 @@ void kuCylinderObject::CreateRenderBuffers()
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
 	glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(GLfloat), &m_Vertices[0], GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VertexSize * sizeof(GLfloat), (GLvoid*)0);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, VertexSize * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 	glEnableVertexAttribArray(1);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
@@ -274,7 +277,7 @@ void kuConeObject::CreateModel()
 void kuConeObject::CreateVertices()
 {
 	std::vector<GLfloat>	verticesBottom;
-	#pragma region // Set circle vertices //
+	#pragma region // Generate circle vertices //
 	for (int i = 0; i <= m_DivisionNum; i++)
 	{
 		float	theta = (float)i * 360.0f / (float)m_DivisionNum;

@@ -36,7 +36,7 @@ void main()
 	kuCylinderObject		cylinderObj(0.05f, 1.0f);
 	kuConeObject			coneObj(0.15f, 0.5f);
 
-	glm::vec3				cameraPos		 = glm::vec3(0.0f, 0.75f, -1.5f);
+	glm::vec3				cameraPos		 = glm::vec3(0.0f, 1.5f, -1.5f);
 	glm::vec3				cameraTarget	 = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3				cameraFront		 = glm::normalize(cameraPos - cameraTarget);
 	glm::vec3				worldUp			 = glm::vec3(0.0f, 1.0f, 0.0f);
