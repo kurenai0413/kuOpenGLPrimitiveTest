@@ -1,5 +1,9 @@
 #include "kuOpenGLPrimitiveObjects.h"
 
+#include <GLM/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #define pi			3.1415926
 #define VertexSize	6			// 3 for position and 3 for normal
 
@@ -171,8 +175,10 @@ void kuCylinderObject::CreateRenderBuffers()
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
 	glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(GLfloat), &m_Vertices[0], GL_STATIC_DRAW);
 
+	// Vertices
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VertexSize * sizeof(GLfloat), (GLvoid*)0);
 	glEnableVertexAttribArray(0);
+	// Normals
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, VertexSize * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 	glEnableVertexAttribArray(1);
 
@@ -253,8 +259,10 @@ void kuConeObject::SetParameters(float radius, float length)
 	m_Length = length;
 	m_VerticesNum = 2 * (m_DivisionNum + 1) + 2;		// First 1: circle first = last, + 2: Tip and bottom center
 
-	CreateVertices();
-	CreateIndices();
+	CreateModel();
+
+	//CreateVertices();
+	//CreateIndices();
 	CreateRenderBuffers();
 }
 
@@ -266,12 +274,95 @@ void kuConeObject::Draw(kuShaderHandler shader)
 	// Render sides
 	glDrawElements(GL_TRIANGLE_FAN, m_DivisionNum + 2, GL_UNSIGNED_INT, 0);
 	// Render bottom
-	glDrawElements(GL_TRIANGLE_FAN, m_DivisionNum + 2, GL_UNSIGNED_INT, (GLvoid*)((m_DivisionNum + 2) * sizeof(int)));
+	glDrawElements(GL_TRIANGLE_STRIP, 2 * (m_DivisionNum + 1), GL_UNSIGNED_INT, (GLvoid*)((m_DivisionNum + 2) * sizeof(int)));
 	glBindVertexArray(0);
 }
 
 void kuConeObject::CreateModel()
 {
+	std::vector<GLfloat>	verticesBottom;
+	#pragma region // Generate circle vertices //
+	for (int i = 0; i <= m_DivisionNum; i++)
+	{
+		float	theta  = -(float)i * 360.0f / (float)m_DivisionNum;
+		float	cosVal = cos(theta * pi / 180);
+		float	sinVal = sin(theta * pi / 180);
+
+		verticesBottom.push_back(m_Radius * cosVal);			// X
+		verticesBottom.push_back(0.0f);							// Y
+		verticesBottom.push_back(m_Radius * sinVal);			// Z
+	}
+	#pragma endregion
+
+	#pragma region // Set bottom face vertices and indcies: 0 ~ (m_DivisionNum + 2) - 1 //
+	// Bottom center vertex
+	m_Vertices.push_back(0.0f);									// X
+	m_Vertices.push_back(0.0f);									// Y
+	m_Vertices.push_back(0.0f);									// Z
+	// Normal
+	m_Vertices.push_back(0.0f);									// X
+	m_Vertices.push_back(-1.0f);								// Y
+	m_Vertices.push_back(0.0f);									// Z
+
+	m_Indices.push_back(m_Vertices.size() / VertexSize - 1);
+
+	for (int i = 0; i <= m_DivisionNum; i++)
+	{
+		m_Vertices.push_back(verticesBottom[3 * (m_DivisionNum - i)]);			// X
+		m_Vertices.push_back(verticesBottom[3 * (m_DivisionNum - i) + 1]);		// Y
+		m_Vertices.push_back(verticesBottom[3 * (m_DivisionNum - i) + 2]);		// Z
+																// Normal
+		m_Vertices.push_back(0);
+		m_Vertices.push_back(-1.0f);
+		m_Vertices.push_back(0);
+
+		m_Indices.push_back(m_Vertices.size() / VertexSize - 1);
+	}
+	#pragma endregion
+
+	#pragma region // Set bottom face vertices and indcies: (m_DivisionNum + 2) ~  (m_DivisionNum + 2) + 2 * (m_DivisionNum + 1) - 1 //
+	// Side triangle strip vertices.
+	for (int i = 0; i <= m_DivisionNum; i++)
+	{
+		int firstIdx, secondIdx;
+		firstIdx = i;
+		if (i == m_DivisionNum)
+			secondIdx = 0;
+		else
+			secondIdx = i + 1;
+
+		glm::vec3 topVertex		= glm::vec3(0.0f, m_Length, 0.0f);
+		glm::vec3 bottomVertexA = glm::vec3(verticesBottom[3 * firstIdx], verticesBottom[3 * firstIdx + 1], verticesBottom[3 * firstIdx + 2]);
+		glm::vec3 bottomVertexB = glm::vec3(verticesBottom[3 * secondIdx], verticesBottom[3 * secondIdx + 1], verticesBottom[3 * secondIdx + 2]);
+
+		glm::vec3 topNormalFace = glm::cross(glm::vec3(bottomVertexA - topVertex), glm::vec3(bottomVertexB - topVertex));
+		glm::vec3 topNormal = glm::cross(glm::vec3(bottomVertexA - topVertex), topNormalFace);
+
+		// Top circle vertex
+		m_Vertices.push_back(0.0f);
+		m_Vertices.push_back(m_Length);
+		m_Vertices.push_back(0.0f);
+		// Top circle normal
+		m_Vertices.push_back(topNormal.x);
+		m_Vertices.push_back(topNormal.y);
+		m_Vertices.push_back(topNormal.z);
+
+		// Index
+		m_Indices.push_back(m_Vertices.size() / VertexSize - 1);
+
+		// Bottom circle vertex
+		m_Vertices.push_back(verticesBottom[3 * i]);
+		m_Vertices.push_back(verticesBottom[3 * i + 1]);
+		m_Vertices.push_back(verticesBottom[3 * i + 2]);
+		// Bottom circle normal
+		m_Vertices.push_back(verticesBottom[3 * i]);
+		m_Vertices.push_back(0);
+		m_Vertices.push_back(verticesBottom[3 * i + 2]);
+
+		// Index
+		m_Indices.push_back(m_Vertices.size() / VertexSize - 1);
+	}
+	#pragma endregion
 }
 
 void kuConeObject::CreateVertices()
