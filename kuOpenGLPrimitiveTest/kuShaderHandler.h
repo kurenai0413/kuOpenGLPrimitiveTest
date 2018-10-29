@@ -23,8 +23,6 @@ public:
 	kuShaderHandler& operator=(kuShaderHandler &rhs);
 
 private:
-
-
 	GLuint	m_ShaderProgramID;
 	bool	m_fShaderCreated;
 };

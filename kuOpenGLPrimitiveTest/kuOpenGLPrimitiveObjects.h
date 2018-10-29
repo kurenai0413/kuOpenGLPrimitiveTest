@@ -16,6 +16,8 @@ public:
 	void					SetCameraConfiguration(glm::mat4 projectionMat, glm::mat4 viewMat, glm::vec3 cameraPos);
 	void					SetPosition(float xPos, float yPos, float zPos);
 	void					SetColor(float R, float G, float B, float alpha);
+	
+	GLuint					GetShaderProgramID();
 
 protected:
 	std::vector<GLfloat>	m_Vertices;

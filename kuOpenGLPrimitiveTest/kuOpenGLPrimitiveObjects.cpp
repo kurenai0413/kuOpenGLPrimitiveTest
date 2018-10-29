@@ -80,6 +80,11 @@ void kuGLPrimitiveObject::SetColor(float R, float G, float B, float alpha)
 	glUniform4fv(objectColorLoc, 1, glm::value_ptr(glm::vec4(R, G, B, alpha)));
 }
 
+GLuint kuGLPrimitiveObject::GetShaderProgramID()
+{
+	return m_Shader.GetShaderProgramID();
+}
+
 void kuGLPrimitiveObject::CreateRenderBuffers()
 {
 	glGenVertexArrays(1, &m_VAO);

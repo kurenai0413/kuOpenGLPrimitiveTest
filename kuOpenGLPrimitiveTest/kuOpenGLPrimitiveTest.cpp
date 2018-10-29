@@ -30,10 +30,6 @@ void main()
 	kuShaderHandler			objectShader;
 	objectShader.Load("VertexShader.vert", "FragmentShader.frag");
 
-	kuCylinderObject		cylinderObj(0.05f, 1.0f);	
-	kuConeObject			coneObj(0.1f, 0.25f);	
-	kuSphereObject			sphereObj(0.1f);
-	
 	glm::vec3				cameraPos		 = glm::vec3(0.0f, 1.5f, -1.0f);
 	glm::vec3				cameraTarget	 = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3				cameraFront		 = glm::normalize(cameraPos - cameraTarget);
@@ -44,6 +40,10 @@ void main()
 	glm::mat4				projectionMat	 = glm::perspective(glm::radians(45.0f), (float)WND_WIDTH/(float)WND_HEIGHT, 0.1f, 100.0f);
 	glm::mat4				viewMat			 = glm::lookAt(cameraPos, cameraTarget, cameraUp);
 
+	kuCylinderObject		cylinderObj(0.05f, 1.0f);
+	kuConeObject			coneObj(0.1f, 0.25f);
+	kuSphereObject			sphereObj(0.5f);
+
 	cylinderObj.SetCameraConfiguration(projectionMat, viewMat, cameraPos);
 	coneObj.SetCameraConfiguration(projectionMat, viewMat, cameraPos);
 	sphereObj.SetCameraConfiguration(projectionMat, viewMat, cameraPos);
@@ -52,7 +52,7 @@ void main()
 	cylinderObj.SetColor(1.0f, 0.0f, 0.0f, 1.0f);
 	coneObj.SetPosition(0.0f, 0.5f, 0.0f);
 	coneObj.SetColor(0.0f, 1.0f, 0.0f, 0.5f);
-	sphereObj.SetPosition(0.0f, 0.0f, 0.0f);
+	sphereObj.SetPosition(0.0f, -0.5f, 0.0f);
 	sphereObj.SetColor(0.0f, 0.0f, 1.0f, 0.5f);
 
 	while (!glfwWindowShouldClose(window))
