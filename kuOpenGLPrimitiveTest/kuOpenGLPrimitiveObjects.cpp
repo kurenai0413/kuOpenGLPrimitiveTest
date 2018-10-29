@@ -41,7 +41,7 @@ const GLchar * fragmentShaderSource =
 // Diffuse
 "vec3 norm = normalize(vertexNormal);\n"
 "vec3 lightDir = normalize(lightPos - vertexPosition);\n"
-"float diff = max(dot(norm, lightDir), 0.0);\n"
+"float diff = max(dot(norm, lightDir), 0.0f);\n"
 "vec3 diffuse = diff * lightColor;\n"
 "outColor = vec4((ambient + diffuse) * objColor, objectColor.a);\n"
 "}\n";
@@ -50,13 +50,11 @@ void kuGLPrimitiveObject::SetCameraConfiguration(glm::mat4 projectionMat, glm::m
 {
 	m_Shader.Use();
 
-	GLuint viewMatLoc, projectionMatLoc;
-	GLuint cameraPosLoc;
+	GLuint viewMatLoc, projectionMatLoc, cameraPosLoc;
 	viewMatLoc = glGetUniformLocation(m_Shader.GetShaderProgramID(), "view");
 	glUniformMatrix4fv(viewMatLoc, 1, GL_FALSE, glm::value_ptr(viewMat));
 	projectionMatLoc = glGetUniformLocation(m_Shader.GetShaderProgramID(), "projection");
 	glUniformMatrix4fv(projectionMatLoc, 1, GL_FALSE, glm::value_ptr(projectionMat));
-
 	cameraPosLoc = glGetUniformLocation(m_Shader.GetShaderProgramID(), "cameraPos");
 	glUniform3fv(cameraPosLoc, 1, glm::value_ptr(cameraPos));
 }
