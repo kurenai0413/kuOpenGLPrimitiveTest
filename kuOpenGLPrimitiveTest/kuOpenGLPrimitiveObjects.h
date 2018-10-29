@@ -97,16 +97,25 @@ protected:
 	float					m_Length;
 
 	void					CreateModel();
-	void					CreateVertices();
-	void					CreateIndices();
 	void					CreateRenderBuffers();
 };
 
 class kuSphereObject : kuGLPrimitiveObject
 {
 public:
+	kuSphereObject();
+	kuSphereObject(float radius);
+	~kuSphereObject();
+
+	void					SetParameters(float radius);
 	void					Draw(kuShaderHandler shader);
 
 protected:
+	const int				m_DivisionNum = 180;
+	const int				m_Level		  = 15;
+
 	float					m_Radius;
+	
+	void					CreateModel();
+	void					CreateRenderBuffers();
 };

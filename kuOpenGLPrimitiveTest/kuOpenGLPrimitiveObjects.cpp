@@ -58,7 +58,7 @@ void kuCylinderObject::CreateModel()
 
 	for (int i = 0; i <= m_DivisionNum; i++)
 	{
-		float	theta = -((float)i * 360.0f / (float)m_DivisionNum);
+		float	theta  = -((float)360.0f / (float)m_DivisionNum) * i;
 		float	cosVal = cos(theta * pi / 180);
 		float	sinVal = sin(theta * pi / 180);
 
@@ -365,13 +365,155 @@ void kuConeObject::CreateModel()
 	#pragma endregion
 }
 
-void kuConeObject::CreateVertices()
+void kuConeObject::CreateRenderBuffers()
 {
+	glGenVertexArrays(1, &m_VAO);
+	glGenBuffers(1, &m_VBO);
+	glGenBuffers(1, &m_EBO);
+
+	glBindVertexArray(m_VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+	glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(GLfloat), &m_Vertices[0], GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(1);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(int), &m_Indices[0], GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+}
+#pragma endregion
+
+#pragma region // Sphere object //
+kuSphereObject::kuSphereObject()
+{
+
+}
+
+kuSphereObject::kuSphereObject(float radius)
+{
+	SetParameters(radius);
+}
+
+kuSphereObject::~kuSphereObject()
+{
+
+}
+
+void kuSphereObject::SetParameters(float radius)
+{
+	m_Radius = radius;
+
+	CreateModel();
+	CreateRenderBuffers();
+}
+
+void kuSphereObject::Draw(kuShaderHandler shader)
+{
+	shader.Use();
+
+	glBindVertexArray(m_VAO);
+	for (int i = 0; i < 2 * m_Level; i++)
+	{
+		glDrawElements(GL_TRIANGLE_STRIP, 2 * (m_DivisionNum + 1), GL_UNSIGNED_INT, (GLvoid*)(2 * (m_DivisionNum + 1) * i * sizeof(int)));
+	}
+	glBindVertexArray(0);
+}
+
+void kuSphereObject::CreateModel()
+{
+	#pragma region // Generate sphere vertices //
+	std::vector<std::vector<GLfloat>>		verticesStacks;
+	verticesStacks.resize(m_Level + 1);
+	for (int i = 0; i <= m_Level; i++)
+	{	
+		float phi	 = ((float)180 / (2.0f * (float)m_Level)) * (float)i;
+		float cosPhi = cos(phi * pi / 180.0f);
+		float sinPhi = sin(phi * pi / 180.0f);
+
+		for (int j = 0; j <= m_DivisionNum; j++)
+		{
+			float	theta = ((float)360.0f / (float)m_DivisionNum) * j;
+			float	cosTheta = cos(theta * pi / 180);
+			float	sinTheta = sin(theta * pi / 180);
+
+			// Vertex position
+			verticesStacks[i].push_back(m_Radius * cosPhi * cosTheta);
+			verticesStacks[i].push_back(m_Radius * sinPhi);
+			verticesStacks[i].push_back(m_Radius * cosPhi * sinTheta);
+		}
+	}
+	#pragma endregion
+
+	#pragma region // Upper half sphere vertices and indices //
+	for (int i = 0; i < m_Level; i++)
+	{
+		for (int j = 0; j <= m_DivisionNum; j++)
+		{
+			// Push lower circle
+			// Vertex position
+			m_Vertices.push_back(verticesStacks[i][3 * j]);
+			m_Vertices.push_back(verticesStacks[i][3 * j + 1]);
+			m_Vertices.push_back(verticesStacks[i][3 * j + 2]);
+			// Vertex normal
+			m_Vertices.push_back(verticesStacks[i][3 * j]);
+			m_Vertices.push_back(verticesStacks[i][3 * j + 1]);
+			m_Vertices.push_back(verticesStacks[i][3 * j + 2]);
+
+			m_Indices.push_back(m_Vertices.size() / VertexSize - 1);
+
+			// Push upper circle
+			// Vertex position
+			m_Vertices.push_back(verticesStacks[i + 1][3 * j]);
+			m_Vertices.push_back(verticesStacks[i + 1][3 * j + 1]);
+			m_Vertices.push_back(verticesStacks[i + 1][3 * j + 2]);
+			// Vertex normal					  
+			m_Vertices.push_back(verticesStacks[i + 1][3 * j]);
+			m_Vertices.push_back(verticesStacks[i + 1][3 * j + 1]);
+			m_Vertices.push_back(verticesStacks[i + 1][3 * j + 2]);
+
+			m_Indices.push_back(m_Vertices.size() / VertexSize - 1);
+		}
+
+		for (int j = 0; j <= m_DivisionNum; j++)
+		{
+			// Push lower circle
+			// Vertex position
+			m_Vertices.push_back( verticesStacks[i][3 * (m_DivisionNum - j)]);
+			m_Vertices.push_back(-verticesStacks[i][3 * (m_DivisionNum - j) + 1]);
+			m_Vertices.push_back( verticesStacks[i][3 * (m_DivisionNum - j) + 2]);
+			// Vertex normal							
+			m_Vertices.push_back( verticesStacks[i][3 * (m_DivisionNum - j)]);
+			m_Vertices.push_back(-verticesStacks[i][3 * (m_DivisionNum - j) + 1]);
+			m_Vertices.push_back( verticesStacks[i][3 * (m_DivisionNum - j) + 2]);
+
+			m_Indices.push_back(m_Vertices.size() / VertexSize - 1);
+
+			// Push upper circle
+			// Vertex position
+			m_Vertices.push_back( verticesStacks[i + 1][3 * (m_DivisionNum - j)]);
+			m_Vertices.push_back(-verticesStacks[i + 1][3 * (m_DivisionNum - j) + 1]);
+			m_Vertices.push_back( verticesStacks[i + 1][3 * (m_DivisionNum - j) + 2]);
+			// Vertex normal					  			
+			m_Vertices.push_back( verticesStacks[i + 1][3 * (m_DivisionNum - j)]);
+			m_Vertices.push_back(-verticesStacks[i + 1][3 * (m_DivisionNum - j) + 1]);
+			m_Vertices.push_back( verticesStacks[i + 1][3 * (m_DivisionNum - j) + 2]);
+
+			m_Indices.push_back(m_Vertices.size() / VertexSize - 1);
+		}
+	}
+	#pragma endregion
+
+	/*
 	std::vector<GLfloat>	verticesBottom;
 	#pragma region // Generate circle vertices //
 	for (int i = 0; i <= m_DivisionNum; i++)
 	{
-		float	theta = (float)i * 360.0f / (float)m_DivisionNum;
+		float	theta  = -(float)i * 360.0f / (float)m_DivisionNum;
 		float	cosVal = cos(theta * pi / 180);
 		float	sinVal = sin(theta * pi / 180);
 
@@ -381,72 +523,72 @@ void kuConeObject::CreateVertices()
 	}
 	#pragma endregion
 
-	#pragma region // Assign sides vertices //
-	m_Vertices.push_back(0.0f);									// Top X
-	m_Vertices.push_back(m_Length);								// Top Y
-	m_Vertices.push_back(0.0f);									// Top Z
-																// Normal
-	m_Vertices.push_back(0.0f);
-	m_Vertices.push_back(1.0f);
-	m_Vertices.push_back(0.0f);
-
-	// Circle vertices
+	#pragma region // Set upper half vertices and indcies: //
+	// Side triangle strip vertices.
 	for (int i = 0; i <= m_DivisionNum; i++)
 	{
-		float	theta = (float)i * 360.0f / (float)m_DivisionNum;
-		float	cosVal = cos(theta * pi / 180);
-		float	sinVal = sin(theta * pi / 180);
-
-		m_Vertices.push_back(verticesBottom[3 * i]);			// X
-		m_Vertices.push_back(verticesBottom[3 * i + 1]);		// Y
-		m_Vertices.push_back(verticesBottom[3 * i + 2]);		// Z
-																// Normal
-		m_Vertices.push_back(cosVal);
+		// Top circle vertex
 		m_Vertices.push_back(0.0f);
-		m_Vertices.push_back(sinVal);
+		m_Vertices.push_back(m_Radius);
+		m_Vertices.push_back(0.0f);
+		// Top circle normal
+		m_Vertices.push_back(0.0f);
+		m_Vertices.push_back(m_Radius);
+		m_Vertices.push_back(0.0f);
+
+		// Index
+		m_Indices.push_back(m_Vertices.size() / VertexSize - 1);
+
+		// Bottom circle vertex
+		m_Vertices.push_back(verticesBottom[3 * i]);
+		m_Vertices.push_back(verticesBottom[3 * i + 1]);
+		m_Vertices.push_back(verticesBottom[3 * i + 2]);
+		// Bottom circle normal
+		m_Vertices.push_back(verticesBottom[3 * i]);
+		m_Vertices.push_back(0);
+		m_Vertices.push_back(verticesBottom[3 * i + 2]);
+
+		// Index
+		m_Indices.push_back(m_Vertices.size() / VertexSize - 1);
 	}
 	#pragma endregion
 
-	// Assign bottom center vertex
-	m_Vertices.push_back(0.0f);									// X
-	m_Vertices.push_back(0.0f);									// Y
-	m_Vertices.push_back(0.0f);									// Z
-	// Normal
-	m_Vertices.push_back(0.0f);									// X
-	m_Vertices.push_back(-1.0f);								// Y
-	m_Vertices.push_back(0.0f);									// Z
-
+	#pragma region // Set lower half vertices and indcies: //
+	// Side triangle strip vertices.
 	for (int i = 0; i <= m_DivisionNum; i++)
 	{
-		float	theta  = (float)i * 360.0f / (float)m_DivisionNum;
-		float	cosVal = cos(theta * pi / 180);
-		float	sinVal = sin(theta * pi / 180);
+		// Top circle vertex
+		m_Vertices.push_back(0.0f);
+		m_Vertices.push_back(-1.0f * m_Radius);
+		m_Vertices.push_back(0.0f);
+		// Top circle normal
+		m_Vertices.push_back(0.0f);
+		m_Vertices.push_back(-1.0f * m_Radius);
+		m_Vertices.push_back(0.0f);
 
-		m_Vertices.push_back(verticesBottom[3 * i]);			// X
-		m_Vertices.push_back(verticesBottom[3 * i + 1]);		// Y
-		m_Vertices.push_back(verticesBottom[3 * i + 2]);		// Z
-		// Normal
-		m_Vertices.push_back(cosVal);
-		m_Vertices.push_back(-1.0f);
-		m_Vertices.push_back(sinVal);
+		// Index
+		m_Indices.push_back(m_Vertices.size() / VertexSize - 1);
+
+		// Bottom circle vertex
+		m_Vertices.push_back(verticesBottom[3 * (m_DivisionNum - i)]);
+		m_Vertices.push_back(verticesBottom[3 * (m_DivisionNum - i) + 1]);
+		m_Vertices.push_back(verticesBottom[3 * (m_DivisionNum - i) + 2]);
+		// Bottom circle normal
+		m_Vertices.push_back(verticesBottom[3 * (m_DivisionNum - i)]);
+		m_Vertices.push_back(0);
+		m_Vertices.push_back(verticesBottom[3 * (m_DivisionNum - i) + 2]);
+
+		// Index
+		m_Indices.push_back(m_Vertices.size() / VertexSize - 1);
 	}
+	#pragma endregion
+
+	int indicesCnt = m_Indices.size();
+	int verticesCnt = m_Vertices.size();
+	*/
 }
 
-void kuConeObject::CreateIndices()
-{
-	m_Indices.push_back(0);
-	for (int i = 1; i <= m_DivisionNum + 1; i++)
-	{
-		m_Indices.push_back(i);
-	}
-	m_Indices.push_back(m_VerticesNum - 1);
-	for (int i = 1; i <= m_DivisionNum + 1; i++)
-	{
-		m_Indices.push_back(i);
-	}
-}
-
-void kuConeObject::CreateRenderBuffers()
+void kuSphereObject::CreateRenderBuffers()
 {
 	glGenVertexArrays(1, &m_VAO);
 	glGenBuffers(1, &m_VBO);
