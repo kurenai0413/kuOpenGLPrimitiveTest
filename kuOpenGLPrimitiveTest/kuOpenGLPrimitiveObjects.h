@@ -12,8 +12,8 @@
 class kuGLPrimitiveObject
 {
 public:
-	virtual void			Draw(kuShaderHandler shader) = 0;
-	void					SetShader(kuShaderHandler shader);
+	virtual void			Draw() = 0;
+	void					SetCameraConfiguration(glm::mat4 projectionMat, glm::mat4 viewMat, glm::vec3 cameraPos);
 	void					SetPosition(float xPos, float yPos, float zPos);
 	void					SetColor(float R, float G, float B, float alpha);
 
@@ -46,7 +46,7 @@ public:
 	~kuCylinderObject();
 
 	void					SetParameters(float radius, float length);
-	void					Draw(kuShaderHandler shader);
+	void					Draw();
 	
 protected:
 	const int				m_DivisionNum = 36;
@@ -90,7 +90,7 @@ protected:
 	float					m_Length;
 };
 
-class kuConeObject : kuGLPrimitiveObject
+class kuConeObject : public kuGLPrimitiveObject
 {
 public:
 	kuConeObject();
@@ -98,7 +98,7 @@ public:
 	~kuConeObject();
 
 	void					SetParameters(float radius, float length);
-	void					Draw(kuShaderHandler shader);
+	void					Draw();
 
 protected:
 	const int				m_DivisionNum = 36;
@@ -108,7 +108,7 @@ protected:
 	void					CreateModel();
 };
 
-class kuSphereObject : kuGLPrimitiveObject
+class kuSphereObject : public kuGLPrimitiveObject
 {
 public:
 	kuSphereObject();
@@ -116,7 +116,7 @@ public:
 	~kuSphereObject();
 
 	void					SetParameters(float radius);
-	void					Draw(kuShaderHandler shader);
+	void					Draw();
 
 protected:
 	const int				m_DivisionNum = 180;

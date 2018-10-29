@@ -30,35 +30,23 @@ void main()
 	kuShaderHandler			objectShader;
 	objectShader.Load("VertexShader.vert", "FragmentShader.frag");
 
-	kuCylinderObject		cylinderObj(0.05f, 1.0f);
-	cylinderObj.SetShader(objectShader);
-	kuConeObject			coneObj(0.1f, 0.5f);
+	kuCylinderObject		cylinderObj(0.05f, 1.0f);	
+	kuConeObject			coneObj(0.1f, 0.5f);	
 	kuSphereObject			sphereObj(0.5f);
-
-	glm::vec3				cameraPos		 = glm::vec3(0.0f, 0.0f, -10.0f);
+	
+	glm::vec3				cameraPos		 = glm::vec3(0.0f, 2.0f, -1.5f);
 	glm::vec3				cameraTarget	 = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3				cameraFront		 = glm::normalize(cameraPos - cameraTarget);
 	glm::vec3				worldUp			 = glm::vec3(0.0f, 1.0f, 0.0f);
 	glm::vec3				cameraRight		 = glm::normalize(glm::cross(worldUp, cameraFront));
 	glm::vec3				cameraUp		 = glm::cross(cameraFront, cameraRight);
 
-	glm::mat4				modelMat;
 	glm::mat4				projectionMat	 = glm::perspective(glm::radians(45.0f), (float)WND_WIDTH/(float)WND_HEIGHT, 0.1f, 100.0f);
 	glm::mat4				viewMat			 = glm::lookAt(cameraPos, cameraTarget, cameraUp);
 
-	objectShader.Use();
-
-	GLuint viewMatLoc, projectionMatLoc;
-	GLuint cameraPosLoc;
-	viewMatLoc = glGetUniformLocation(objectShader.GetShaderProgramID(), "view");
-	glUniformMatrix4fv(viewMatLoc, 1, GL_FALSE, glm::value_ptr(viewMat));
-	projectionMatLoc = glGetUniformLocation(objectShader.GetShaderProgramID(), "projection");
-	glUniformMatrix4fv(projectionMatLoc, 1, GL_FALSE, glm::value_ptr(projectionMat));
-
-	cameraPosLoc = glGetUniformLocation(objectShader.GetShaderProgramID(), "cameraPos");
-	glUniform3fv(cameraPosLoc, 1, glm::value_ptr(cameraPos));
-
-	cylinderObj.SetPosition(0.0f, 2.0f, 0.0f);
+	cylinderObj.SetCameraConfiguration(projectionMat, viewMat, cameraPos);
+	coneObj.SetCameraConfiguration(projectionMat, viewMat, cameraPos);
+	sphereObj.SetCameraConfiguration(projectionMat, viewMat, cameraPos);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -69,10 +57,13 @@ void main()
 		
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		cylinderObj.Draw(objectShader);
-		//coneObj.Draw(objectShader);
-		//sphereObj.Draw(objectShader);
+		
+		cylinderObj.SetPosition(0.0f, 0.0f, 0.0f);
+		cylinderObj.Draw();
+		coneObj.SetPosition(0.0f, 0.0f, 0.0f);
+		coneObj.Draw();
+		sphereObj.SetPosition(0.0f, 0.0f, 0.0f);
+		sphereObj.Draw();
 
 		glfwSwapBuffers(window);
 	}

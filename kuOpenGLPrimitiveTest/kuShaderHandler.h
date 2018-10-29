@@ -16,12 +16,14 @@ public:
 	~kuShaderHandler();
 
 	void	Load(const char * VSPathName, const char * FSPathName);
+	void	CompileShaders(const GLchar * vertexShader, const GLchar * fragmentShader);
 	void	Use();
 	GLuint	GetShaderProgramID();
 
 	kuShaderHandler& operator=(kuShaderHandler &rhs);
 
 private:
+
 
 	GLuint	m_ShaderProgramID;
 	bool	m_fShaderCreated;

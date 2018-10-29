@@ -3,9 +3,61 @@
 #define pi			3.1415926
 #define VertexSize	6			// 3 for position and 3 for normal
 
-void kuGLPrimitiveObject::SetShader(kuShaderHandler shader)
+const GLchar * vertexShaderSource =
+"#version 410 core\n"
+"layout (location = 0) in vec3 position;\n"
+"layout (location = 1) in vec3 normal;\n"
+"in vec3 color;\n"
+"out vec3 vertexColor;\n"
+"out vec3 vertexNormal;\n"
+"out vec3 vertexPosition;\n"
+"uniform mat4 model;\n"
+"uniform mat4 view;\n"
+"uniform mat4 projection;\n"
+"void main()\n"
+"{\n"
+"gl_Position = projection * view * model * vec4(position, 1.0);\n"
+"vertexNormal = normal;\n"
+"vertexPosition = position;\n"
+"vertexColor = color;\n"
+"}\0";
+
+const GLchar * fragmentShaderSource =
+"#version 410 core\n"
+"in vec3 vertexColor;\n"
+"in vec3 vertexPosition;\n"
+"in vec3 vertexNormal;\n"
+"out vec4 outColor;\n"
+"uniform vec3 cameraPos;\n"
+"void main()\n"
+"{\n"
+"vec3 lightColor = vec3(1.0f, 1.0f, 1.0f);\n"
+"vec3 lightPos = cameraPos;\n"
+"vec3 objectColor = vec3(0.0f, 0.0f, 1.0f);\n"
+// Ambient
+"float ambientStrenth = 0.1f;\n"
+"vec3 ambient = ambientStrenth * lightColor;\n"
+// Diffuse
+"vec3 norm = normalize(vertexNormal);\n"
+"vec3 lightDir = normalize(lightPos - vertexPosition);\n"
+"float diff = max(dot(norm, lightDir), 0.0);\n"
+"vec3 diffuse = diff * lightColor;\n"
+"outColor = vec4((ambient + diffuse) * objectColor, 0.5f);\n"
+"}\n";
+
+void kuGLPrimitiveObject::SetCameraConfiguration(glm::mat4 projectionMat, glm::mat4 viewMat, glm::vec3 cameraPos)
 {
-	m_Shader = shader;
+	m_Shader.Use();
+
+	GLuint viewMatLoc, projectionMatLoc;
+	GLuint cameraPosLoc;
+	viewMatLoc = glGetUniformLocation(m_Shader.GetShaderProgramID(), "view");
+	glUniformMatrix4fv(viewMatLoc, 1, GL_FALSE, glm::value_ptr(viewMat));
+	projectionMatLoc = glGetUniformLocation(m_Shader.GetShaderProgramID(), "projection");
+	glUniformMatrix4fv(projectionMatLoc, 1, GL_FALSE, glm::value_ptr(projectionMat));
+
+	cameraPosLoc = glGetUniformLocation(m_Shader.GetShaderProgramID(), "cameraPos");
+	glUniform3fv(cameraPosLoc, 1, glm::value_ptr(cameraPos));
 }
 
 void kuGLPrimitiveObject::SetPosition(float xPos, float yPos, float zPos)
@@ -22,6 +74,7 @@ void kuGLPrimitiveObject::SetPosition(float xPos, float yPos, float zPos)
 
 void kuGLPrimitiveObject::SetColor(float R, float G, float B, float alpha)
 {
+
 }
 
 void kuGLPrimitiveObject::CreateRenderBuffers()
@@ -55,6 +108,7 @@ kuCylinderObject::kuCylinderObject()
 kuCylinderObject::kuCylinderObject(float radius, float length)
 {
 	SetParameters(radius, length);
+	m_Shader.CompileShaders(vertexShaderSource, fragmentShaderSource);
 }
 
 kuCylinderObject::~kuCylinderObject()
@@ -72,10 +126,9 @@ void kuCylinderObject::SetParameters(float radius, float length)
 	CreateRenderBuffers();
 }
 
-void kuCylinderObject::Draw(kuShaderHandler shader)
+void kuCylinderObject::Draw()
 {
-	shader.Use();	
-
+	m_Shader.Use();	
 	glBindVertexArray(m_VAO);
 	glDrawElements(GL_TRIANGLE_STRIP, m_VerticesNum, GL_UNSIGNED_INT, 0);
 	glDrawElements(GL_TRIANGLE_FAN, m_DivisionNum + 2, GL_UNSIGNED_INT, (GLvoid*)((m_VerticesNum) * sizeof(int)));
@@ -261,6 +314,7 @@ kuConeObject::kuConeObject()
 kuConeObject::kuConeObject(float radius, float length)
 {
 	SetParameters(radius, length);
+	m_Shader.CompileShaders(vertexShaderSource, fragmentShaderSource);
 }
 
 kuConeObject::~kuConeObject()
@@ -275,16 +329,12 @@ void kuConeObject::SetParameters(float radius, float length)
 	m_VerticesNum = 2 * (m_DivisionNum + 1) + 2;		// First 1: circle first = last, + 2: Tip and bottom center
 
 	CreateModel();
-
-	//CreateVertices();
-	//CreateIndices();
 	CreateRenderBuffers();
 }
 
-void kuConeObject::Draw(kuShaderHandler shader)
+void kuConeObject::Draw()
 {
-	shader.Use();
-
+	m_Shader.Use();
 	glBindVertexArray(m_VAO);
 	// Render sides
 	glDrawElements(GL_TRIANGLE_FAN, m_DivisionNum + 2, GL_UNSIGNED_INT, 0);
@@ -390,6 +440,7 @@ kuSphereObject::kuSphereObject()
 kuSphereObject::kuSphereObject(float radius)
 {
 	SetParameters(radius);
+	m_Shader.CompileShaders(vertexShaderSource, fragmentShaderSource);
 }
 
 kuSphereObject::~kuSphereObject()
@@ -405,10 +456,9 @@ void kuSphereObject::SetParameters(float radius)
 	CreateRenderBuffers();
 }
 
-void kuSphereObject::Draw(kuShaderHandler shader)
+void kuSphereObject::Draw()
 {
-	shader.Use();
-
+	m_Shader.Use();
 	glBindVertexArray(m_VAO);
 	for (int i = 0; i < 2 * m_Level; i++)
 	{
