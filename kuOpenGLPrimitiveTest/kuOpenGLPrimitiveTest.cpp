@@ -48,6 +48,13 @@ void main()
 	coneObj.SetCameraConfiguration(projectionMat, viewMat, cameraPos);
 	sphereObj.SetCameraConfiguration(projectionMat, viewMat, cameraPos);
 
+	cylinderObj.SetPosition(0.0f, 0.0f, 0.0f);
+	cylinderObj.SetColor(1.0f, 0.0f, 0.0f, 1.0f);
+	coneObj.SetPosition(0.0f, 0.5f, 0.0f);
+	coneObj.SetColor(0.0f, 1.0f, 0.0f, 0.5f);
+	sphereObj.SetPosition(0.0f, 0.0f, 0.0f);
+	sphereObj.SetColor(0.0f, 0.0f, 1.0f, 0.5f);
+
 	while (!glfwWindowShouldClose(window))
 	{
 		glfwPollEvents();
@@ -58,11 +65,8 @@ void main()
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		cylinderObj.SetPosition(0.0f, 0.0f, 0.0f);
 		cylinderObj.Draw();
-		coneObj.SetPosition(0.0f, 0.5f, 0.0f);
 		coneObj.Draw();
-		sphereObj.SetPosition(0.0f, 0.0f, 0.0f);
 		sphereObj.Draw();
 
 		glfwSwapBuffers(window);

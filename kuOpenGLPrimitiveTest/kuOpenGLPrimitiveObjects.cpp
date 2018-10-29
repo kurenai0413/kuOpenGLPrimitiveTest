@@ -29,11 +29,12 @@ const GLchar * fragmentShaderSource =
 "in vec3 vertexNormal;\n"
 "out vec4 outColor;\n"
 "uniform vec3 cameraPos;\n"
+"uniform vec4 objectColor;\n"
 "void main()\n"
 "{\n"
 "vec3 lightColor = vec3(1.0f, 1.0f, 1.0f);\n"
 "vec3 lightPos = cameraPos;\n"
-"vec3 objectColor = vec3(0.0f, 0.0f, 1.0f);\n"
+"vec3 objColor = vec3(objectColor.r, objectColor.g, objectColor.b);\n"
 // Ambient
 "float ambientStrenth = 0.1f;\n"
 "vec3 ambient = ambientStrenth * lightColor;\n"
@@ -42,7 +43,7 @@ const GLchar * fragmentShaderSource =
 "vec3 lightDir = normalize(lightPos - vertexPosition);\n"
 "float diff = max(dot(norm, lightDir), 0.0);\n"
 "vec3 diffuse = diff * lightColor;\n"
-"outColor = vec4((ambient + diffuse) * objectColor, 0.5f);\n"
+"outColor = vec4((ambient + diffuse) * objColor, 0.5f);\n"
 "}\n";
 
 void kuGLPrimitiveObject::SetCameraConfiguration(glm::mat4 projectionMat, glm::mat4 viewMat, glm::vec3 cameraPos)
@@ -74,7 +75,9 @@ void kuGLPrimitiveObject::SetPosition(float xPos, float yPos, float zPos)
 
 void kuGLPrimitiveObject::SetColor(float R, float G, float B, float alpha)
 {
-
+	m_Shader.Use();
+	GLuint objectColorLoc = glGetUniformLocation(m_Shader.GetShaderProgramID(), "objectColor");
+	glUniform4fv(objectColorLoc, 1, glm::value_ptr(glm::vec4(R, G, B, alpha)));
 }
 
 void kuGLPrimitiveObject::CreateRenderBuffers()
