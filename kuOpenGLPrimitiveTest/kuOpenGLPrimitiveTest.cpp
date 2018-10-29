@@ -33,15 +33,15 @@ void main()
 	kuShaderHandler			objectShader;
 	objectShader.Load("VertexShader.vert", "FragmentShader.frag");
 
-	kuCylinderObject		cylinderObj(0.15f, 0.5f);
+	kuCylinderObject		cylinderObj(0.05f, 1.0f);
 	kuConeObject			coneObj(0.15f, 0.5f);
 
-	glm::vec3				cameraPos		 = glm::vec3(1.0f, -1.0f, -1.0f);
+	glm::vec3				cameraPos		 = glm::vec3(0.0f, 0.75f, -1.5f);
 	glm::vec3				cameraTarget	 = glm::vec3(0.0f, 0.0f, 0.0f);
-	glm::vec3				cameraDirection  = glm::normalize(cameraPos - cameraTarget);
+	glm::vec3				cameraFront		 = glm::normalize(cameraPos - cameraTarget);
 	glm::vec3				worldUp			 = glm::vec3(0.0f, 1.0f, 0.0f);
-	glm::vec3				cameraRight		 = glm::normalize(glm::cross(worldUp, cameraDirection));
-	glm::vec3				cameraUp		 = glm::cross(cameraDirection, cameraRight);
+	glm::vec3				cameraRight		 = glm::normalize(glm::cross(worldUp, cameraFront));
+	glm::vec3				cameraUp		 = glm::cross(cameraFront, cameraRight);
 
 	glm::mat4				modelMat;
 	glm::mat4				projectionMat	 = glm::perspective(glm::radians(45.0f), (float)WND_WIDTH/(float)WND_HEIGHT, 0.1f, 100.0f);
@@ -71,8 +71,8 @@ void main()
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		//cylinderObj.Draw(objectShader);
-		coneObj.Draw(objectShader);
+		cylinderObj.Draw(objectShader);
+		//coneObj.Draw(objectShader);
 
 		glfwSwapBuffers(window);
 	}
@@ -119,9 +119,9 @@ GLFWwindow * kuGLInit(const char * title, int xRes, int yRes)
 	glViewport(0, 0, xRes, yRes);
 
 	// Setup OpenGL options (z-buffer)
-	//glEnable(GL_DEPTH_TEST);
-	//glEnable(GL_CULL_FACE);
-	//glCullFace(GL_FRONT);
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
 	
 	//glEnable(GL_MULTISAMPLE);
 

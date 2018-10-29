@@ -20,8 +20,7 @@ protected:
 
 	int						m_VerticesNum;
 
-	virtual void			CreateVertices()	  = 0;
-	virtual void			CreateIndices()		  = 0;
+	virtual void			CreateModel()		  = 0;
 	virtual void			CreateRenderBuffers() = 0;
 };
 
@@ -40,8 +39,7 @@ protected:
 	float					m_Radius;
 	float					m_Length;
 
-	void					CreateVertices();
-	void					CreateIndices();
+	void					CreateModel();
 	void					CreateRenderBuffers();
 };
 
@@ -94,6 +92,7 @@ protected:
 	float					m_Radius;
 	float					m_Length;
 
+	void					CreateModel();
 	void					CreateVertices();
 	void					CreateIndices();
 	void					CreateRenderBuffers();

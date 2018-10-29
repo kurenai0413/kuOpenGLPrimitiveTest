@@ -27,7 +27,7 @@ void main()
 	// Specular
 
 
-	outColor = vec4((ambient + diffuse) * objectColor, 1.0f);
+	outColor = vec4((ambient + diffuse) * objectColor, 0.5f);
 	
 	//outColor = vec4(objectColor, 1.0f);
 }

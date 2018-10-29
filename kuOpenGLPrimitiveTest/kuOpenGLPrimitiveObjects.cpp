@@ -24,33 +24,35 @@ void kuCylinderObject::SetParameters(float radius, float length)
 	m_Length = length;
 	m_VerticesNum = 2 * (m_DivisionNum + 1);
 
-	CreateVertices();
-	CreateIndices();
+	CreateModel();
 	CreateRenderBuffers();
 }
 
 void kuCylinderObject::Draw(kuShaderHandler shader)
 {
-	shader.Use();
+	shader.Use();	
 
 	glBindVertexArray(m_VAO);
 	glDrawElements(GL_TRIANGLE_STRIP, m_VerticesNum, GL_UNSIGNED_INT, 0);
 	glDrawElements(GL_TRIANGLE_FAN, m_DivisionNum + 2, GL_UNSIGNED_INT, (GLvoid*)((m_VerticesNum) * sizeof(int)));
-	//glDrawElements(GL_TRIANGLE_FAN, m_DivisionNum + 2, GL_UNSIGNED_INT, (GLvoid*)((m_VerticesNum + m_DivisionNum + 2) * sizeof(int)));
+	glDrawElements(GL_TRIANGLE_FAN, m_DivisionNum + 2, GL_UNSIGNED_INT, (GLvoid*)((m_VerticesNum + m_DivisionNum + 2) * sizeof(int)));
 	glBindVertexArray(0);
 }
 
-void kuCylinderObject::CreateVertices()
+void kuCylinderObject::CreateModel()
 {
 	if (m_Vertices.size() != 0)
 		m_Vertices.clear();
 
-#pragma region // Setup top and bottom vertices //
+	if (m_Indices.size() != 0)
+		m_Indices.clear();
+
+	#pragma region // Generate top and bottom vertices //
 	std::vector<GLfloat> verticesTop;
 	std::vector<GLfloat> verticesBottom;
 	for (int i = 0; i <= m_DivisionNum; i++)
 	{
-		float	theta = (float)i * 360.0f / (float)m_DivisionNum;
+		float	theta = -((float)i * 360.0f / (float)m_DivisionNum);
 		float	cosVal = cos(theta * pi / 180);
 		float	sinVal = sin(theta * pi / 180);
 
@@ -64,9 +66,10 @@ void kuCylinderObject::CreateVertices()
 		verticesBottom.push_back(-0.5f * m_Length);
 		verticesBottom.push_back(m_Radius * sinVal);
 	}
-#pragma endregion
+	#pragma endregion
 
-#pragma region // Vertices for side strip //
+	#pragma region // Set side faces vertices and indices: 0 ~ (2 * (m_DivisionNum + 1) - 1) //
+	// Side triangle strip vertices.
 	for (int i = 0; i <= m_DivisionNum; i++)
 	{
 		m_Vertices.push_back(verticesTop[3 * i]);
@@ -87,9 +90,16 @@ void kuCylinderObject::CreateVertices()
 		m_Vertices.push_back(0);
 		m_Vertices.push_back(verticesTop[3 * i + 2]);
 	}
-#pragma endregion
 
-#pragma region // Vertices for top fan //
+	// Side triangle strip indices: 0 ~ 2 * (m_DivisionNum + 1).
+	int vertexNumSide = 2 * (m_DivisionNum + 1);
+	for (int i = 0; i < vertexNumSide; i++)
+	{
+		m_Indices.push_back(i);
+	}
+	#pragma endregion
+
+	#pragma region // Set top face vertices and indices: 2 * (m_DivisionNum + 1) ~ 2 * (m_DivisionNum + 1) + (m_DivisionNum + 2) - 1 //
 	// Top center
 	m_Vertices.push_back(0.0f);
 	m_Vertices.push_back(0.5f * m_Length);
@@ -99,6 +109,10 @@ void kuCylinderObject::CreateVertices()
 	m_Vertices.push_back(1.0f);
 	m_Vertices.push_back(0.0f);
 
+	// Set top center index
+	m_Indices.push_back(2 * (m_DivisionNum + 1));
+
+	int topStride = 2 * (m_DivisionNum + 1) + 1;
 	for (int i = 0; i <= m_DivisionNum; i++)
 	{
 		m_Vertices.push_back(verticesTop[3 * i]);
@@ -109,10 +123,13 @@ void kuCylinderObject::CreateVertices()
 		m_Vertices.push_back(0.0f);
 		m_Vertices.push_back(1.0f);
 		m_Vertices.push_back(0.0f);
-	}
-#pragma endregion
 
-#pragma region // Vertices for bottom fan //
+		// Indices
+		m_Indices.push_back((2 * (m_DivisionNum + 1) + 1) + i);
+	}
+	#pragma endregion
+
+	#pragma region // Set bottom face vertices and indcies: 2 * (m_DivisionNum + 1) + (m_DivisionNum + 2) ~ 2 * (m_DivisionNum + 1) + 2 * (m_DivisionNum + 2) - 1 //
 	// Bottom center
 	m_Vertices.push_back(0.0f);
 	m_Vertices.push_back(0.5f * m_Length);
@@ -122,45 +139,23 @@ void kuCylinderObject::CreateVertices()
 	m_Vertices.push_back(-1.0f);
 	m_Vertices.push_back(0.0f);
 
+	// Set bottom center index
+	m_Indices.push_back(2 * (m_DivisionNum + 1) + (m_DivisionNum + 2));
+
 	for (int i = 0; i <= m_DivisionNum; i++)
 	{
-		m_Vertices.push_back(verticesBottom[3 * i]);
-		m_Vertices.push_back(verticesBottom[3 * i + 1]);
-		m_Vertices.push_back(verticesBottom[3 * i + 2]);
+		m_Vertices.push_back(verticesBottom[3 * (m_DivisionNum - i)]);
+		m_Vertices.push_back(verticesBottom[3 * (m_DivisionNum - i) + 1]);
+		m_Vertices.push_back(verticesBottom[3 * (m_DivisionNum - i) + 2]);
 
 		// Bottom normal
 		m_Vertices.push_back(0.0f);
 		m_Vertices.push_back(-1.0f);
 		m_Vertices.push_back(0.0f);
-	}
-#pragma endregion
-}
 
-void kuCylinderObject::CreateIndices()
-{
-	if (m_Indices.size() != 0)
-		m_Indices.size();
-
-	int vertexNumSide = 2 * (m_DivisionNum + 1);
-	for (int i = 0; i < vertexNumSide; i++)
-	{
-		m_Indices.push_back(i);
+		m_Indices.push_back((2 * (m_DivisionNum + 1) + (m_DivisionNum + 2) + 1) + i);
 	}
-
-	int vertexNumTop = m_DivisionNum + 1;				// divisionNum + center
-	m_Indices.push_back(2 * (m_DivisionNum + 1));		// Center
-	for (int i = 0; i < m_DivisionNum; i++)
-	{
-		m_Indices.push_back(2 * i);
-	}
-	m_Indices.push_back(0);								// Last = first
-
-	m_Indices.push_back(2 * (m_DivisionNum + 1) + 1);	// Center
-	for (int i = 0; i < m_DivisionNum; i++)
-	{
-		m_Indices.push_back(2 * i + 1);
-	}
-	m_Indices.push_back(1);								// Last = first
+	#pragma endregion
 }
 
 void kuCylinderObject::CreateRenderBuffers()
@@ -270,6 +265,10 @@ void kuConeObject::Draw(kuShaderHandler shader)
 	// Render bottom
 	glDrawElements(GL_TRIANGLE_FAN, m_DivisionNum + 2, GL_UNSIGNED_INT, (GLvoid*)((m_DivisionNum + 2) * sizeof(int)));
 	glBindVertexArray(0);
+}
+
+void kuConeObject::CreateModel()
+{
 }
 
 void kuConeObject::CreateVertices()
