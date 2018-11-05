@@ -4,7 +4,10 @@
 
 #include <GLM/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/norm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/common.hpp>
 
 #include "kuShaderHandler.h"
 
@@ -14,7 +17,11 @@ class kuGLPrimitiveObject
 public:
 	virtual void			Draw() = 0;
 	void					SetCameraConfiguration(glm::mat4 projectionMat, glm::mat4 viewMat, glm::vec3 cameraPos);
-	void					SetPosition(float xPos, float yPos, float zPos);
+	
+	// Transform
+	void					SetPosition(glm::vec3 pos);
+	void					RotateToVec(glm::vec3 newUpVec);
+	
 	void					SetColor(float R, float G, float B, float alpha);
 	
 	GLuint					GetShaderProgramID();
@@ -34,10 +41,14 @@ protected:
 	GLfloat					m_YPos				  = 0;
 	GLfloat					m_ZPos				  = 0;
 
+	glm::vec3				m_UpVector;
+
 	int						m_VerticesNum;
 
 	virtual void			CreateModel()		  = 0;
 	void					CreateRenderBuffers();
+
+	void					UpdateModelMat();
 };
 
 class kuCylinderObject : public kuGLPrimitiveObject

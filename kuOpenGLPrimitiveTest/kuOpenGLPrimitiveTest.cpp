@@ -30,7 +30,7 @@ void main()
 	kuShaderHandler			objectShader;
 	objectShader.Load("VertexShader.vert", "FragmentShader.frag");
 
-	glm::vec3				cameraPos		 = glm::vec3(0.0f, 1.5f, -1.0f);
+	glm::vec3				cameraPos		 = glm::vec3(0.0f, 2.0f, -3.0f);
 	glm::vec3				cameraTarget	 = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3				cameraFront		 = glm::normalize(cameraPos - cameraTarget);
 	glm::vec3				worldUp			 = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -40,20 +40,33 @@ void main()
 	glm::mat4				projectionMat	 = glm::perspective(glm::radians(45.0f), (float)WND_WIDTH/(float)WND_HEIGHT, 0.1f, 100.0f);
 	glm::mat4				viewMat			 = glm::lookAt(cameraPos, cameraTarget, cameraUp);
 
-	kuCylinderObject		cylinderObj(0.05f, 1.0f);
+	glm::vec3				entryPt			 = glm::vec3(1.0f, 1.0f, -1.0f);
+	glm::vec3				targetPt		 = glm::vec3(0.0f, 0.0f, 0.0f);
+	//glm::vec3				testPt = glm::vec3(0.5f * (entryPt + targetPt));
+	float					pathLength		 = sqrt(glm::vec3(targetPt - entryPt).length());
+
+	kuCylinderObject		pathObj(0.025f, pathLength);
 	kuConeObject			coneObj(0.1f, 0.25f);
-	kuSphereObject			sphereObj(0.5f);
 
-	cylinderObj.SetCameraConfiguration(projectionMat, viewMat, cameraPos);
+	kuSphereObject			entryPtObj(0.03f);
+	kuSphereObject			targetPtObj(0.05f);
+
+	pathObj.SetCameraConfiguration(projectionMat, viewMat, cameraPos);
 	coneObj.SetCameraConfiguration(projectionMat, viewMat, cameraPos);
-	sphereObj.SetCameraConfiguration(projectionMat, viewMat, cameraPos);
+	targetPtObj.SetCameraConfiguration(projectionMat, viewMat, cameraPos);
+	entryPtObj.SetCameraConfiguration(projectionMat, viewMat, cameraPos);
 
-	cylinderObj.SetPosition(0.0f, 0.0f, 0.0f);
-	cylinderObj.SetColor(1.0f, 0.0f, 0.0f, 1.0f);
-	coneObj.SetPosition(0.0f, 0.5f, 0.0f);
+	pathObj.SetPosition(glm::vec3(0.5f * (entryPt + targetPt)));
+	pathObj.RotateToVec(glm::vec3(targetPt - entryPt));
+	pathObj.SetColor(0.0f, 0.0f, 1.0f, 0.85f);
+		
+	coneObj.SetPosition(glm::vec3(0.0f, 1.0f, 0.0f));
 	coneObj.SetColor(0.0f, 1.0f, 0.0f, 0.5f);
-	sphereObj.SetPosition(0.0f, -0.5f, 0.0f);
-	sphereObj.SetColor(0.0f, 0.0f, 1.0f, 0.5f);
+	
+	entryPtObj.SetPosition(entryPt);
+	entryPtObj.SetColor(1.0f, 0.0f, 0.0f, 0.75f);
+	targetPtObj.SetPosition(targetPt);
+	targetPtObj.SetColor(1.0f, 0.0f, 0.0f, 0.75f);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -65,9 +78,10 @@ void main()
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		cylinderObj.Draw();
+		pathObj.Draw();
 		coneObj.Draw();
-		sphereObj.Draw();
+		targetPtObj.Draw();
+		entryPtObj.Draw();
 
 		glfwSwapBuffers(window);
 	}

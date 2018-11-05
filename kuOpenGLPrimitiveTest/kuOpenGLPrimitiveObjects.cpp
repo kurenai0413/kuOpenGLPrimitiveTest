@@ -17,8 +17,8 @@ const GLchar * vertexShaderSource =
 "void main()\n"
 "{\n"
 "gl_Position = projection * view * model * vec4(position, 1.0);\n"
-"vertexNormal = normal;\n"
-"vertexPosition = position;\n"
+"vertexNormal = mat3(transpose(inverse(model))) * normal;\n"
+"vertexPosition = vec3(model * vec4(position, 1.0f));\n"
 "vertexColor = color;\n"
 "}\0";
 
@@ -59,16 +59,50 @@ void kuGLPrimitiveObject::SetCameraConfiguration(glm::mat4 projectionMat, glm::m
 	glUniform3fv(cameraPosLoc, 1, glm::value_ptr(cameraPos));
 }
 
-void kuGLPrimitiveObject::SetPosition(float xPos, float yPos, float zPos)
+void kuGLPrimitiveObject::SetPosition(glm::vec3 pos)
 {
-	m_ModelMat = glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
+	m_ModelMat *= glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
 						   0.0f, 1.0f, 0.0f, 0.0f,
 						   0.0f, 0.0f, 1.0f, 0.0f,
-						   xPos, yPos, zPos, 1.0);
+						   pos.x, pos.y, pos.z, 1.0);
 
-	m_Shader.Use();
-	GLuint modelMatLoc = glGetUniformLocation(m_Shader.GetShaderProgramID(), "model");
-	glUniformMatrix4fv(modelMatLoc, 1, GL_FALSE, glm::value_ptr(m_ModelMat));
+	UpdateModelMat();
+}
+
+void kuGLPrimitiveObject::RotateToVec(glm::vec3 newUpVec)
+{
+	glm::vec3 start = glm::normalize(m_UpVector);
+	glm::vec3 dest  = glm::normalize(newUpVec);
+	glm::vec3 rotationAxis;
+
+	glm::quat rotationQuat;
+
+	float cosTheta = glm::dot(start, dest);
+
+	if (cosTheta < -1 + 0.001f)
+	{
+		rotationAxis = glm::cross(glm::vec3(0.0f, 0.0f, 1.0f), start);
+
+		if (glm::length2(rotationAxis) < 0.01f)
+			rotationAxis = glm::normalize(rotationAxis);
+
+		rotationQuat = glm::quat(glm::radians(180.0f), rotationAxis);
+	}
+	else
+	{
+		rotationAxis = glm::cross(start, dest);
+		float s = sqrt((1 + cosTheta) * 2);
+		float invs = 1 / s;
+
+		rotationQuat = glm::quat(0.5f* s,
+			rotationAxis.x * invs,
+			rotationAxis.y * invs,
+			rotationAxis.z * invs);
+	}
+
+	m_ModelMat *= glm::toMat4(rotationQuat);
+	m_UpVector = newUpVec;
+	UpdateModelMat();
 }
 
 void kuGLPrimitiveObject::SetColor(float R, float G, float B, float alpha)
@@ -105,6 +139,13 @@ void kuGLPrimitiveObject::CreateRenderBuffers()
 	glBindVertexArray(0);
 }
 
+void kuGLPrimitiveObject::UpdateModelMat()
+{
+	m_Shader.Use();
+	GLuint modelMatLoc = glGetUniformLocation(m_Shader.GetShaderProgramID(), "model");
+	glUniformMatrix4fv(modelMatLoc, 1, GL_FALSE, glm::value_ptr(m_ModelMat));
+}
+
 #pragma region // Cylinder object //
 kuCylinderObject::kuCylinderObject()
 {
@@ -115,6 +156,9 @@ kuCylinderObject::kuCylinderObject(float radius, float length)
 {
 	SetParameters(radius, length);
 	m_Shader.CompileShaders(vertexShaderSource, fragmentShaderSource);
+
+	m_UpVector = glm::vec3(0.0f, 1.0f, 0.0f);
+	SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
 }
 
 kuCylinderObject::~kuCylinderObject()
@@ -321,6 +365,9 @@ kuConeObject::kuConeObject(float radius, float length)
 {
 	SetParameters(radius, length);
 	m_Shader.CompileShaders(vertexShaderSource, fragmentShaderSource);
+	
+	m_UpVector = glm::vec3(0.0f, 1.0f, 0.0f);
+	SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
 }
 
 kuConeObject::~kuConeObject()
@@ -447,6 +494,8 @@ kuSphereObject::kuSphereObject(float radius)
 {
 	SetParameters(radius);
 	m_Shader.CompileShaders(vertexShaderSource, fragmentShaderSource);
+
+	SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
 }
 
 kuSphereObject::~kuSphereObject()
