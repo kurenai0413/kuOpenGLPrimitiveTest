@@ -201,8 +201,8 @@ void kuCylinderObject::CreateModel()
 	for (int i = 0; i <= m_DivisionNum; i++)
 	{
 		float	theta  = -((float)360.0f / (float)m_DivisionNum) * i;
-		float	cosVal = cos(theta * pi / 180);
-		float	sinVal = sin(theta * pi / 180);
+		float	cosVal = (float)cos(theta * pi / 180);
+		float	sinVal = (float)sin(theta * pi / 180);
 
 		// Top vertices positions
 		verticesTop.push_back(m_Radius * cosVal);
@@ -230,7 +230,7 @@ void kuCylinderObject::CreateModel()
 		m_Vertices.push_back(verticesTop[3 * i + 2]);
 
 		// Index
-		m_Indices.push_back(m_Vertices.size() / VertexSize - 1);
+		m_Indices.push_back((int)m_Vertices.size() / VertexSize - 1);
 
 		// Bottom circle vertex
 		m_Vertices.push_back(verticesBottom[3 * i]);
@@ -242,7 +242,7 @@ void kuCylinderObject::CreateModel()
 		m_Vertices.push_back(verticesTop[3 * i + 2]);
 	
 		// Index
-		m_Indices.push_back(m_Vertices.size() / VertexSize - 1);
+		m_Indices.push_back((int)m_Vertices.size() / VertexSize - 1);
 	}
 	#pragma endregion
 
@@ -257,7 +257,7 @@ void kuCylinderObject::CreateModel()
 	m_Vertices.push_back(0.0f);
 
 	// Set top center index
-	m_Indices.push_back(m_Vertices.size() / VertexSize - 1);
+	m_Indices.push_back((int)m_Vertices.size() / VertexSize - 1);
 
 	int topStride = 2 * (m_DivisionNum + 1) + 1;
 	for (int i = 0; i <= m_DivisionNum; i++)
@@ -272,7 +272,7 @@ void kuCylinderObject::CreateModel()
 		m_Vertices.push_back(0.0f);
 
 		// Indices
-		m_Indices.push_back(m_Vertices.size() / VertexSize - 1);
+		m_Indices.push_back((int)m_Vertices.size() / VertexSize - 1);
 	}
 	#pragma endregion
 
@@ -287,7 +287,7 @@ void kuCylinderObject::CreateModel()
 	m_Vertices.push_back(0.0f);
 
 	// Set bottom center index
-	m_Indices.push_back(m_Vertices.size() / VertexSize - 1);
+	m_Indices.push_back((int)m_Vertices.size() / VertexSize - 1);
 
 	for (int i = 0; i <= m_DivisionNum; i++)
 	{
@@ -302,7 +302,7 @@ void kuCylinderObject::CreateModel()
 		m_Vertices.push_back(0.0f);
 		
 		// Index
-		m_Indices.push_back(m_Vertices.size() / VertexSize - 1);
+		m_Indices.push_back((int)m_Vertices.size() / VertexSize - 1);
 	}
 	#pragma endregion
 }
@@ -403,8 +403,8 @@ void kuConeObject::CreateModel()
 	for (int i = 0; i <= m_DivisionNum; i++)
 	{
 		float	theta  = -(float)i * 360.0f / (float)m_DivisionNum;
-		float	cosVal = cos(theta * pi / 180);
-		float	sinVal = sin(theta * pi / 180);
+		float	cosVal =  (float)cos(theta * pi / 180);
+		float	sinVal =  (float)sin(theta * pi / 180);
 
 		verticesBottom.push_back(m_Radius * cosVal);			// X
 		verticesBottom.push_back(0.0f);							// Y
@@ -422,7 +422,7 @@ void kuConeObject::CreateModel()
 	m_Vertices.push_back(-1.0f);								// Y
 	m_Vertices.push_back(0.0f);									// Z
 
-	m_Indices.push_back(m_Vertices.size() / VertexSize - 1);
+	m_Indices.push_back((int)m_Vertices.size() / VertexSize - 1);
 
 	for (int i = 0; i <= m_DivisionNum; i++)
 	{
@@ -434,7 +434,7 @@ void kuConeObject::CreateModel()
 		m_Vertices.push_back(-1.0f);
 		m_Vertices.push_back(0);
 
-		m_Indices.push_back(m_Vertices.size() / VertexSize - 1);
+		m_Indices.push_back((int)m_Vertices.size() / VertexSize - 1);
 	}
 	#pragma endregion
 
@@ -454,7 +454,7 @@ void kuConeObject::CreateModel()
 		glm::vec3 bottomVertexB = glm::vec3(verticesBottom[3 * secondIdx], verticesBottom[3 * secondIdx + 1], verticesBottom[3 * secondIdx + 2]);
 
 		glm::vec3 topNormalFace = glm::cross(glm::vec3(bottomVertexA - topVertex), glm::vec3(bottomVertexB - topVertex));
-		glm::vec3 topNormal = glm::cross(glm::vec3(bottomVertexA - topVertex), topNormalFace);
+		glm::vec3 topNormal		= glm::cross(glm::vec3(bottomVertexA - topVertex), topNormalFace);
 
 		// Top circle vertex
 		m_Vertices.push_back(0.0f);
@@ -466,7 +466,7 @@ void kuConeObject::CreateModel()
 		m_Vertices.push_back(topNormal.z);
 
 		// Index
-		m_Indices.push_back(m_Vertices.size() / VertexSize - 1);
+		m_Indices.push_back((int)m_Vertices.size() / VertexSize - 1);
 
 		// Bottom circle vertex
 		m_Vertices.push_back(verticesBottom[3 * i]);
@@ -478,7 +478,7 @@ void kuConeObject::CreateModel()
 		m_Vertices.push_back(verticesBottom[3 * i + 2]);
 
 		// Index
-		m_Indices.push_back(m_Vertices.size() / VertexSize - 1);
+		m_Indices.push_back((int)m_Vertices.size() / VertexSize - 1);
 	}
 	#pragma endregion
 }
@@ -530,14 +530,14 @@ void kuSphereObject::CreateModel()
 	for (int i = 0; i <= m_Level; i++)
 	{	
 		float phi	 = ((float)180 / (2.0f * (float)m_Level)) * (float)i;
-		float cosPhi = cos(phi * pi / 180.0f);
-		float sinPhi = sin(phi * pi / 180.0f);
+		float cosPhi = (float)cos(phi * pi / 180.0f);
+		float sinPhi = (float)sin(phi * pi / 180.0f);
 
 		for (int j = 0; j <= m_DivisionNum; j++)
 		{
 			float	theta = ((float)360.0f / (float)m_DivisionNum) * j;
-			float	cosTheta = cos(theta * pi / 180);
-			float	sinTheta = sin(theta * pi / 180);
+			float	cosTheta = (float)cos(theta * pi / 180);
+			float	sinTheta = (float)sin(theta * pi / 180);
 
 			// Vertex position
 			verticesStacks[i].push_back(m_Radius * cosPhi * cosTheta);
@@ -562,7 +562,7 @@ void kuSphereObject::CreateModel()
 			m_Vertices.push_back(verticesStacks[i][3 * j + 1]);
 			m_Vertices.push_back(verticesStacks[i][3 * j + 2]);
 
-			m_Indices.push_back(m_Vertices.size() / VertexSize - 1);
+			m_Indices.push_back((int)m_Vertices.size() / VertexSize - 1);
 
 			// Push upper circle
 			// Vertex position
@@ -574,7 +574,7 @@ void kuSphereObject::CreateModel()
 			m_Vertices.push_back(verticesStacks[i + 1][3 * j + 1]);
 			m_Vertices.push_back(verticesStacks[i + 1][3 * j + 2]);
 
-			m_Indices.push_back(m_Vertices.size() / VertexSize - 1);
+			m_Indices.push_back((int)m_Vertices.size() / VertexSize - 1);
 		}
 
 		for (int j = 0; j <= m_DivisionNum; j++)
@@ -589,7 +589,7 @@ void kuSphereObject::CreateModel()
 			m_Vertices.push_back(-verticesStacks[i][3 * (m_DivisionNum - j) + 1]);
 			m_Vertices.push_back( verticesStacks[i][3 * (m_DivisionNum - j) + 2]);
 
-			m_Indices.push_back(m_Vertices.size() / VertexSize - 1);
+			m_Indices.push_back((int)m_Vertices.size() / VertexSize - 1);
 
 			// Push upper circle
 			// Vertex position
@@ -601,9 +601,82 @@ void kuSphereObject::CreateModel()
 			m_Vertices.push_back(-verticesStacks[i + 1][3 * (m_DivisionNum - j) + 1]);
 			m_Vertices.push_back( verticesStacks[i + 1][3 * (m_DivisionNum - j) + 2]);
 
-			m_Indices.push_back(m_Vertices.size() / VertexSize - 1);
+			m_Indices.push_back((int)m_Vertices.size() / VertexSize - 1);
 		}
 	}
 	#pragma endregion
 }
 #pragma endregion
+
+#pragma region // Arraw object //
+kuArrawObject::kuArrawObject()
+{
+}
+
+kuArrawObject::kuArrawObject(float radius, float length)
+{
+}
+
+kuArrawObject::~kuArrawObject()
+{
+}
+
+void kuArrawObject::SetParameters(float radius, float length)
+{
+}
+
+void kuArrawObject::SetPosition(glm::vec3 pos)
+{
+}
+
+void kuArrawObject::RotateToVec(glm::vec3 newUpVec)
+{
+}
+
+void kuArrawObject::Draw()
+{
+}
+
+void kuArrawObject::CreateModel()
+{
+}
+#pragma endregion
+
+#pragma region // Coordinate axes object //
+kuCoordinateAxesObject::kuCoordinateAxesObject()
+{
+
+}
+
+kuCoordinateAxesObject::kuCoordinateAxesObject(float scale)
+{
+}
+
+kuCoordinateAxesObject::~kuCoordinateAxesObject()
+{
+}
+
+void kuCoordinateAxesObject::SetParameters(float scale)
+{
+}
+
+void kuCoordinateAxesObject::SetPosition(glm::vec3 pos)
+{
+}
+
+void kuCoordinateAxesObject::RotateToVec(glm::vec3 newUpVec)
+{
+}
+
+void kuCoordinateAxesObject::Draw()
+{
+}
+
+void kuCoordinateAxesObject::CreateModel()
+{
+}
+
+
+#pragma endregion
+
+

@@ -39,7 +39,6 @@ void main()
 
 	glm::vec3				entryPt			 = glm::vec3(1.0f, 1.0f, -1.0f);
 	glm::vec3				targetPt		 = glm::vec3(0.0f, 0.0f, 0.0f);
-	//glm::vec3				testPt = glm::vec3(0.5f * (entryPt + targetPt));
 	float					pathLength		 = (float)sqrt(glm::vec3(targetPt - entryPt).length());
 
 	kuCylinderObject		pathObj(0.025f, pathLength);
@@ -47,6 +46,8 @@ void main()
 
 	kuSphereObject			entryPtObj(0.03f);
 	kuSphereObject			targetPtObj(0.05f);
+
+	kuCoordinateAxesObject	coordinateAxesObj;
 
 	pathObj.SetCameraConfiguration(projectionMat, viewMat, cameraPos);
 	coneObj.SetCameraConfiguration(projectionMat, viewMat, cameraPos);

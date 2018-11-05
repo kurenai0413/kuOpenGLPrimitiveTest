@@ -21,7 +21,7 @@ public:
 	// Transform
 	void					SetPosition(glm::vec3 pos);
 	void					RotateToVec(glm::vec3 newUpVec);
-	
+	// Color
 	void					SetColor(float R, float G, float B, float alpha);
 	
 	GLuint					GetShaderProgramID();
@@ -48,6 +48,19 @@ protected:
 	virtual void			CreateModel()		  = 0;
 	void					CreateRenderBuffers();
 
+	void					UpdateModelMat();
+};
+
+class IkuGLPrimitiveComboObject
+{
+public:
+	virtual void			Draw() = 0;
+	void					SetCameraConfiguration(glm::mat4 projectionMat, glm::mat4 viewMat, glm::vec3 cameraPos);
+
+	virtual void			SetPosition(glm::vec3 pos) = 0;
+	virtual void			RotateToVec(glm::vec3 newUpVec) = 0;
+
+protected:
 	void					UpdateModelMat();
 };
 
@@ -138,4 +151,41 @@ protected:
 	float					m_Radius;
 	
 	void					CreateModel();
+};
+
+class kuArrawObject : public IkuGLPrimitiveComboObject
+{
+public:
+	kuArrawObject();
+	kuArrawObject(float radius, float length);
+	~kuArrawObject();
+
+	void				SetParameters(float radius, float length);
+	void				SetPosition(glm::vec3 pos);
+	void				RotateToVec(glm::vec3 newUpVec);
+	void				Draw();
+
+protected:
+	kuConeObject		m_ArrawTip;
+	kuCylinderObject	m_ArrawBody;
+
+	void				CreateModel();
+};
+
+class kuCoordinateAxesObject : public IkuGLPrimitiveComboObject
+{
+public:
+	kuCoordinateAxesObject();
+	kuCoordinateAxesObject(float scale);
+	~kuCoordinateAxesObject();
+
+	void				SetParameters(float scale);
+	void				SetPosition(glm::vec3 pos);
+	void				RotateToVec(glm::vec3 newUpVec);
+	void				Draw();
+
+protected:
+	kuArrawObject		m_Axes[3];
+
+	void				CreateModel();
 };
