@@ -27,9 +27,6 @@ void main()
 {
 	GLFWwindow			*	window = kuGLInit("kuOpenGLTest", WND_WIDTH, WND_HEIGHT);
 
-	kuShaderHandler			objectShader;
-	objectShader.Load("VertexShader.vert", "FragmentShader.frag");
-
 	glm::vec3				cameraPos		 = glm::vec3(0.0f, 2.0f, -3.0f);
 	glm::vec3				cameraTarget	 = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3				cameraFront		 = glm::normalize(cameraPos - cameraTarget);
@@ -43,7 +40,7 @@ void main()
 	glm::vec3				entryPt			 = glm::vec3(1.0f, 1.0f, -1.0f);
 	glm::vec3				targetPt		 = glm::vec3(0.0f, 0.0f, 0.0f);
 	//glm::vec3				testPt = glm::vec3(0.5f * (entryPt + targetPt));
-	float					pathLength		 = sqrt(glm::vec3(targetPt - entryPt).length());
+	float					pathLength		 = (float)sqrt(glm::vec3(targetPt - entryPt).length());
 
 	kuCylinderObject		pathObj(0.025f, pathLength);
 	kuConeObject			coneObj(0.1f, 0.25f);
