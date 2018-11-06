@@ -46,6 +46,8 @@ const GLchar * fragmentShaderSource =
 "outColor = vec4((ambient + diffuse) * objColor, objectColor.a);\n"
 "}\n";
 
+using namespace kuGLModule;
+
 void kuGLPrimitiveObject::SetCameraConfiguration(glm::mat4 projectionMat, glm::mat4 viewMat, glm::vec3 cameraPos)
 {
 	m_Shader.Use();
@@ -61,7 +63,7 @@ void kuGLPrimitiveObject::SetCameraConfiguration(glm::mat4 projectionMat, glm::m
 
 void kuGLPrimitiveObject::SetPosition(glm::vec3 pos)
 {
-	m_ModelMat *= glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
+	m_ModelMat = glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
 						   0.0f, 1.0f, 0.0f, 0.0f,
 						   0.0f, 0.0f, 1.0f, 0.0f,
 						   pos.x, pos.y, pos.z, 1.0);
@@ -95,9 +97,9 @@ void kuGLPrimitiveObject::RotateToVec(glm::vec3 newUpVec)
 		float invs = 1 / s;
 
 		rotationQuat = glm::quat(0.5f* s,
-			rotationAxis.x * invs,
-			rotationAxis.y * invs,
-			rotationAxis.z * invs);
+								 rotationAxis.x * invs,
+								 rotationAxis.y * invs,
+								 rotationAxis.z * invs);
 	}
 
 	m_ModelMat *= glm::toMat4(rotationQuat);
@@ -155,10 +157,6 @@ kuCylinderObject::kuCylinderObject()
 kuCylinderObject::kuCylinderObject(float radius, float length)
 {
 	SetParameters(radius, length);
-	m_Shader.CompileShaders(vertexShaderSource, fragmentShaderSource);
-
-	m_UpVector = glm::vec3(0.0f, 1.0f, 0.0f);
-	SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
 }
 
 kuCylinderObject::~kuCylinderObject()
@@ -174,6 +172,11 @@ void kuCylinderObject::SetParameters(float radius, float length)
 
 	CreateModel();
 	CreateRenderBuffers();
+
+	m_Shader.CompileShaders(vertexShaderSource, fragmentShaderSource);
+
+	m_UpVector = glm::vec3(0.0f, 1.0f, 0.0f);
+	SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
 }
 
 void kuCylinderObject::Draw()
@@ -364,10 +367,6 @@ kuConeObject::kuConeObject()
 kuConeObject::kuConeObject(float radius, float length)
 {
 	SetParameters(radius, length);
-	m_Shader.CompileShaders(vertexShaderSource, fragmentShaderSource);
-	
-	m_UpVector = glm::vec3(0.0f, 1.0f, 0.0f);
-	SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
 }
 
 kuConeObject::~kuConeObject()
@@ -383,6 +382,11 @@ void kuConeObject::SetParameters(float radius, float length)
 
 	CreateModel();
 	CreateRenderBuffers();
+
+	m_Shader.CompileShaders(vertexShaderSource, fragmentShaderSource);
+
+	m_UpVector = glm::vec3(0.0f, 1.0f, 0.0f);
+	SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
 }
 
 void kuConeObject::Draw()
@@ -493,8 +497,7 @@ kuSphereObject::kuSphereObject()
 kuSphereObject::kuSphereObject(float radius)
 {
 	SetParameters(radius);
-	m_Shader.CompileShaders(vertexShaderSource, fragmentShaderSource);
-
+	
 	SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
 }
 
@@ -509,6 +512,8 @@ void kuSphereObject::SetParameters(float radius)
 
 	CreateModel();
 	CreateRenderBuffers();
+
+	m_Shader.CompileShaders(vertexShaderSource, fragmentShaderSource);
 }
 
 void kuSphereObject::Draw()
@@ -611,72 +616,155 @@ void kuSphereObject::CreateModel()
 #pragma region // Arraw object //
 kuArrawObject::kuArrawObject()
 {
+
 }
 
 kuArrawObject::kuArrawObject(float radius, float length)
 {
+	SetParameters(radius, length);
 }
 
 kuArrawObject::~kuArrawObject()
 {
+
+}
+
+void kuArrawObject::SetCameraConfiguration(glm::mat4 projectionMat, glm::mat4 viewMat, glm::vec3 cameraPos)
+{
+	m_ArrawTip.SetCameraConfiguration(projectionMat, viewMat, cameraPos);
+	m_ArrawBody.SetCameraConfiguration(projectionMat, viewMat, cameraPos);
 }
 
 void kuArrawObject::SetParameters(float radius, float length)
 {
+	m_Radius = radius;
+	m_Length = length;
+
+	m_ArrawTip.SetParameters(1.5f * m_Radius, 0.2f * m_Length);
+	m_ArrawBody.SetParameters(0.85f * m_Radius, 0.8f * m_Length);
+	
+	m_UpVector = glm::vec3(0.0f, 1.0f, 0.0f);
+	m_Position = glm::vec3(0.0f, 0.0f ,0.0f);
+
+	SetPosition(m_Position);
+}
+
+void kuArrawObject::SetColor(float R, float G, float B, float alpha)
+{
+	m_ArrawTip.SetColor(R, G, B, alpha);
+	m_ArrawBody.SetColor(R, G, B, alpha);
 }
 
 void kuArrawObject::SetPosition(glm::vec3 pos)
 {
+	m_Position	   = pos;
+
+	m_TipPosition  = pos + 0.3f * m_UpVector;
+	m_BodyPosition = pos - 0.1f * m_UpVector;
+
+	m_ArrawTip.SetPosition(m_TipPosition);
+	m_ArrawBody.SetPosition(m_BodyPosition);
 }
 
 void kuArrawObject::RotateToVec(glm::vec3 newUpVec)
 {
+	m_UpVector = newUpVec;
+	SetPosition(m_Position);
+
+	m_ArrawTip.RotateToVec(newUpVec);
+	m_ArrawBody.RotateToVec(newUpVec);
 }
 
 void kuArrawObject::Draw()
 {
-}
-
-void kuArrawObject::CreateModel()
-{
+	m_ArrawTip.Draw();
+	m_ArrawBody.Draw();
 }
 #pragma endregion
 
 #pragma region // Coordinate axes object //
 kuCoordinateAxesObject::kuCoordinateAxesObject()
 {
-
+	m_Axes[0].SetColor(1.0f, 0.0f, 0.0f, 1.0f);
 }
 
 kuCoordinateAxesObject::kuCoordinateAxesObject(float scale)
 {
+	SetParameters(scale);
 }
 
 kuCoordinateAxesObject::~kuCoordinateAxesObject()
 {
 }
 
+void kuCoordinateAxesObject::SetCameraConfiguration(glm::mat4 projectionMat, glm::mat4 viewMat, glm::vec3 cameraPos)
+{
+	for (int i = 0; i < 3; i++)
+	{
+		m_Axes[i].SetCameraConfiguration(projectionMat, viewMat, cameraPos);
+	}
+	m_Sphere.SetCameraConfiguration(projectionMat, viewMat, cameraPos);
+}
+
 void kuCoordinateAxesObject::SetParameters(float scale)
 {
+	m_Scale		  = scale;
+
+	// Set directions.
+	m_UpVector	  = glm::vec3(0.0f, 1.0f, 0.0f);	// Y
+	m_RightVector = glm::vec3(1.0f, 0.0f, 0.0f);	// X
+	m_FrontVector = glm::vec3(0.0f, 0.0f, 1.0f);	// Z
+
+	// Set default of the position.
+	m_Position   = glm::vec3(0.0f, 0.0f, 0.0f);
+
+	for (int i = 0; i < 3; i++)
+	{
+		m_Axes[i].SetParameters(m_AxesRadius * scale, scale);
+	}
+
+	m_Axes[0].SetColor(1.0f, 0.0f, 0.0f, 1.0f);
+	m_Axes[1].SetColor(0.0f, 1.0f, 0.0f, 1.0f);
+	m_Axes[2].SetColor(0.0f, 0.0f, 1.0f, 1.0f);
+
+	m_Sphere.SetParameters(m_SphereRadius * scale);
+	m_Sphere.SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+	SetPosition(m_Position);
 }
 
 void kuCoordinateAxesObject::SetPosition(glm::vec3 pos)
 {
+	m_Position = pos;
+	m_AxesPos[0] = m_Position + glm::vec3(0.5f * m_Scale, 0.0f, 0.0f) * m_RightVector;	// X
+	m_AxesPos[1] = m_Position + glm::vec3(0.0f, 0.5f * m_Scale, 0.0f) * m_UpVector;		// Y
+	m_AxesPos[2] = m_Position + glm::vec3(0.0f, 0.0f, 0.5f * m_Scale) * m_FrontVector;	// Z
+	
+	for (int i = 0; i < 3; i++)
+	{
+		m_Axes[i].SetPosition(m_AxesPos[i]);
+	}
+
+	m_Axes[0].RotateToVec(m_RightVector);		// X;
+	m_Axes[1].RotateToVec(m_UpVector);			// Y;
+	m_Axes[2].RotateToVec(m_FrontVector);		// Z;
+
+	m_Sphere.SetPosition(m_Position);
 }
 
 void kuCoordinateAxesObject::RotateToVec(glm::vec3 newUpVec)
 {
+
 }
 
 void kuCoordinateAxesObject::Draw()
 {
+	for (int i = 0; i < 3; i++)
+	{
+		m_Axes[i].Draw();
+	}
+ 	m_Sphere.Draw();
 }
-
-void kuCoordinateAxesObject::CreateModel()
-{
-}
-
-
 #pragma endregion
 
 

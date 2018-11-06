@@ -15,19 +15,19 @@
 #define WND_WIDTH	1024
 #define WND_HEIGHT	768
 
-#define cylinderNum 100000
-
 bool						keyPressArray[1024];
 
 GLFWwindow				*	kuGLInit(const char * title, int xRes, int yRes);
 void						key_callback(GLFWwindow * window, int key, int scancode, int action, int mode);
 void						mouse_callback(GLFWwindow * window, double xPos, double yPos);
 
+using namespace kuGLModule;
+
 void main()
 {
 	GLFWwindow			*	window = kuGLInit("kuOpenGLTest", WND_WIDTH, WND_HEIGHT);
 
-	glm::vec3				cameraPos		 = glm::vec3(0.0f, 2.0f, -3.0f);
+	glm::vec3				cameraPos		 = glm::vec3(-3.0f, 3.0f, 5.0f);		// 0.0f, 1.5f, -5.0f
 	glm::vec3				cameraTarget	 = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3				cameraFront		 = glm::normalize(cameraPos - cameraTarget);
 	glm::vec3				worldUp			 = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -41,30 +41,38 @@ void main()
 	glm::vec3				targetPt		 = glm::vec3(0.0f, 0.0f, 0.0f);
 	float					pathLength		 = (float)sqrt(glm::vec3(targetPt - entryPt).length());
 
-	kuCylinderObject		pathObj(0.025f, pathLength);
+	//kuCylinderObject		pathObj(0.025f, pathLength);
 	kuConeObject			coneObj(0.1f, 0.25f);
 
 	kuSphereObject			entryPtObj(0.03f);
-	kuSphereObject			targetPtObj(0.05f);
+	kuSphereObject			targetPtObj(0.06f);
 
-	kuCoordinateAxesObject	coordinateAxesObj;
+	kuArrawObject			arrawObj(0.04f, pathLength);
 
-	pathObj.SetCameraConfiguration(projectionMat, viewMat, cameraPos);
+	kuCoordinateAxesObject	coordinateAxesObj(1.0f);
+
+	//pathObj.SetCameraConfiguration(projectionMat, viewMat, cameraPos);
 	coneObj.SetCameraConfiguration(projectionMat, viewMat, cameraPos);
 	targetPtObj.SetCameraConfiguration(projectionMat, viewMat, cameraPos);
 	entryPtObj.SetCameraConfiguration(projectionMat, viewMat, cameraPos);
+	arrawObj.SetCameraConfiguration(projectionMat, viewMat, cameraPos);
+	coordinateAxesObj.SetCameraConfiguration(projectionMat, viewMat, cameraPos);
 
-	pathObj.SetPosition(glm::vec3(0.5f * (entryPt + targetPt)));
-	pathObj.RotateToVec(glm::vec3(targetPt - entryPt));
-	pathObj.SetColor(0.0f, 0.0f, 1.0f, 0.85f);
+	//pathObj.SetPosition(glm::vec3(0.5f * (entryPt + targetPt)));
+	//pathObj.RotateToVec(glm::vec3(targetPt - entryPt));
+	//pathObj.SetColor(0.0f, 0.0f, 1.0f, 0.85f);
 		
-	coneObj.SetPosition(glm::vec3(0.0f, 1.0f, 0.0f));
+	coneObj.SetPosition(glm::vec3(0.0f, 0.5f, 0.0f));
 	coneObj.SetColor(0.0f, 1.0f, 0.0f, 0.5f);
 	
 	entryPtObj.SetPosition(entryPt);
-	entryPtObj.SetColor(1.0f, 0.0f, 0.0f, 0.75f);
+	entryPtObj.SetColor(1.0f, 0.0f, 0.0f, 0.4f);
 	targetPtObj.SetPosition(targetPt);
-	targetPtObj.SetColor(1.0f, 0.0f, 0.0f, 0.75f);
+	targetPtObj.SetColor(1.0f, 0.0f, 0.0f, 0.4f);
+
+	arrawObj.SetColor(0.0f, 0.0f, 1.0f, 1.0f);
+	arrawObj.SetPosition(glm::vec3(0.5f * (entryPt + targetPt)));
+	arrawObj.RotateToVec(glm::vec3(targetPt - entryPt));
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -75,12 +83,13 @@ void main()
 		
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		
+		coordinateAxesObj.Draw();
 
-		pathObj.Draw();
-		coneObj.Draw();
+		arrawObj.Draw();
 		targetPtObj.Draw();
 		entryPtObj.Draw();
-
+	
 		glfwSwapBuffers(window);
 	}
 
