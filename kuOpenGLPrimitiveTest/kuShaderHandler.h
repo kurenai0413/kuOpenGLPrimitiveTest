@@ -6,7 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
-#include <GLEW/glew.h>
+#include <glad/glad.h>
 
 class kuShaderHandler
 {

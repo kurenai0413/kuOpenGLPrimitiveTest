@@ -2,11 +2,10 @@
 #include <vector>
 #include <windows.h>
 
-#include <GLEW/glew.h>
+//#include <GL/glew.h>
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <GLM/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 #include "kuShaderHandler.h"
 #include "kuOpenGLPrimitiveObjects.h"
@@ -122,13 +121,10 @@ GLFWwindow * kuGLInit(const char * title, int xRes, int yRes)
 	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	//glfwSetCursorPosCallback(window, mouse_callback);					// 顧名思義...大概只有位置資訊而沒有button事件資訊吧
 
-	// need to create OpenGL window before glew initialization.
-	//glewExperimental = GL_TRUE;
-	GLenum err = glewInit();
-	if (err != GLEW_OK)
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
-		// Problem: glewInit failed, something is seriously wrong.
-		std::cout << "glewInit failed, aborting." << std::endl;
+		std::cout << "Failed to initialize OpenGL context" << std::endl;
+		//return -1;
 	}
 
 	// Define the viewport dimensions
